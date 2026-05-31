@@ -1,0 +1,20 @@
+{
+  "name": "instagram-carousel",
+  "description": "Plan and generate on-brand Instagram carousels: research + copywriting into a spec, then fully-rendered 1080x1350 slides via HiggsField GPT Image 2.",
+  "version": "0.1.0",
+  "author": {
+    "name": "EricTechPro"
+  },
+  "homepage": "https://github.com/EricTechPro/instagram-carousel-skills",
+  "repository": "https://github.com/EricTechPro/instagram-carousel-skills",
+  "license": "MIT",
+  "keywords": [
+    "instagram",
+    "carousel",
+    "social-media",
+    "copywriting",
+    "image-generation",
+    "higgsfield",
+    "skills"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "name": "instagram-carousel-skills",
+  "description": "Eric Tech's Instagram carousel toolkit: plan (research + copy) and generate (branded slides).",
+  "owner": {
+    "name": "EricTechPro"
+  },
+  "plugins": [
+    {
+      "name": "instagram-carousel",
+      "description": "Plan and generate on-brand Instagram carousels with HiggsField GPT Image 2.",
+      "version": "0.1.0",
+      "source": "./",
+      "author": {
+        "name": "EricTechPro"
+      }
+    }
+  ]
+}

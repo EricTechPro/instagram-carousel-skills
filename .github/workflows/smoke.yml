@@ -1,0 +1,33 @@
+name: smoke
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  install-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install.sh into a temp project
+        run: |
+          TMP="$(mktemp -d)"
+          bash ./install.sh "$TMP"
+          test -f "$TMP/.claude/skills/instagram-carousel-plan/SKILL.md"
+          test -f "$TMP/.claude/skills/instagram-carousel-generate/SKILL.md"
+          test -f "$TMP/.claude/instagram-carousel/character-references/github-logo.png"
+          echo "✓ both skills + assets installed"
+
+      - name: validate JSON manifests
+        run: |
+          python3 -c "import json; json.load(open('marketplace.json'))"
+          python3 -c "import json; json.load(open('.claude-plugin/plugin.json'))"
+          echo "✓ manifests valid"
+
+      - name: python wrapper imports
+        run: |
+          python3 -m pip install --quiet Pillow
+          python3 -c "import ast; ast.parse(open('skills/instagram-carousel-generate/scripts/generate_carousel.py').read())"
+          echo "✓ wrapper parses"
