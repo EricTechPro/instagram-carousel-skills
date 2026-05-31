@@ -26,8 +26,19 @@ jobs:
           python3 -c "import json; json.load(open('.claude-plugin/plugin.json'))"
           echo "✓ manifests valid"
 
-      - name: python wrapper imports
+      - name: dry-run render the example spec (no credits)
+        env:
+          IG_CAROUSEL_ASSETS: ${{ github.workspace }}
         run: |
           python3 -m pip install --quiet Pillow
-          python3 -c "import ast; ast.parse(open('skills/instagram-carousel-generate/scripts/generate_carousel.py').read())"
-          echo "✓ wrapper parses"
+          python3 skills/instagram-carousel-generate/scripts/generate_carousel.py \
+            examples/top-5-github-repos/carousel-spec.md --dry-run
+          for n in 01 02 03 04 05 06 07 08; do
+            test -f examples/top-5-github-repos/slides/slide-$n.png
+          done
+          python3 - <<'PY'
+          from PIL import Image
+          im = Image.open("examples/top-5-github-repos/slides/slide-01.png")
+          assert im.size == (1080, 1350), im.size
+          print("✓ 8 slides rendered at 1080x1350")
+          PY

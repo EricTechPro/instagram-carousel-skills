@@ -53,8 +53,13 @@ def resolve_assets() -> Path:
     if env:
         candidates.append(Path(env))
     here = Path(__file__).resolve()
-    candidates.append(here.parents[2])                       # skills/<skill>/.. -> repo-ish
-    candidates.append(here.parents[3] if len(here.parents) > 3 else here.parent)
+    candidates.append(here.parents[2])                       # clone: skills/<skill>/.. (no, see [3])
+    if len(here.parents) > 3:
+        candidates.append(here.parents[3])                   # clone layout: repo root holds assets/
+        # install.sh layout: <target>/.claude/skills/<skill>/scripts -> <target>/.claude/instagram-carousel
+        candidates.append(here.parents[3] / "instagram-carousel")
+    if len(here.parents) > 4:
+        candidates.append(here.parents[4] / "instagram-carousel")
     candidates.append(Path.home() / ".claude" / "instagram-carousel")
     for base in candidates:
         if (base / "assets" / "fonts").is_dir() or (base / "fonts").is_dir():
@@ -165,6 +170,22 @@ def accent_marker(draw, x, y, size, color):
 
 
 # ---- main composition -------------------------------------------------------
+def safe_accent(value: str) -> str:
+    """Return a Pillow-parseable color, falling back to DEFAULT_ACCENT.
+
+    Spec fields may carry placeholders (e.g. "<tool hex>") or typos; a bad
+    accent must not crash the whole compose run.
+    """
+    from PIL import ImageColor
+    if value:
+        try:
+            ImageColor.getrgb(value)
+            return value
+        except (ValueError, AttributeError):
+            pass
+    return DEFAULT_ACCENT
+
+
 def crop_cover(bg: Image.Image) -> Image.Image:
     bg = bg.convert("RGB")
     bw, bh = bg.size
@@ -176,7 +197,7 @@ def crop_cover(bg: Image.Image) -> Image.Image:
 
 
 def compose(slide: dict, background: str, out: str, assets: Path) -> dict:
-    accent = slide.get("accent_hex") or DEFAULT_ACCENT
+    accent = safe_accent(slide.get("accent_hex") or DEFAULT_ACCENT)
     img = crop_cover(Image.open(background)) if background and Path(background).exists() \
         else Image.new("RGB", (W, H), WHITE)
     draw = ImageDraw.Draw(img)
