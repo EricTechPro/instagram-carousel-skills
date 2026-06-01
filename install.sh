@@ -43,6 +43,9 @@ for skill in instagram-carousel-plan instagram-carousel-generate; do
 done
 
 # Shared assets the generate skill needs at runtime (style refs + logos + fonts).
+# rm -rf first so re-running the installer replaces assets instead of nesting them
+# (cp -R into an existing dir would create assets/assets, character-references/character-references).
+rm -rf "$ASSETS_DIR/assets" "$ASSETS_DIR/character-references"
 cp -R "$SRC_DIR/assets" "$ASSETS_DIR/assets"
 cp -R "$SRC_DIR/character-references" "$ASSETS_DIR/character-references"
 chmod +x "$SKILLS_DIR/instagram-carousel-generate/scripts/"*.py 2>/dev/null || true
@@ -54,7 +57,7 @@ Done. Two skills installed:
   • instagram-carousel-plan      — research + copywriting -> carousel-spec.md
   • instagram-carousel-generate  — spec -> 1080x1350 slides (HiggsField GPT Image 2)
 
-Set this so the generate skill always finds the bundled assets:
+Assets auto-resolve from the install above. Only set this if you move them elsewhere:
   export IG_CAROUSEL_ASSETS="$ASSETS_DIR"
 
 Then in Claude Code: "plan an instagram carousel for <topic>".

@@ -52,12 +52,12 @@ def resolve_assets() -> Path:
     env = os.environ.get("IG_CAROUSEL_ASSETS")
     if env:
         candidates.append(Path(env))
+    # scripts/ → [0]=scripts [1]=<skill> [2]=skills [3]=repo-root-or-.claude [4]=project-root
     here = Path(__file__).resolve()
-    candidates.append(here.parents[2])                       # clone: skills/<skill>/.. (no, see [3])
+    candidates.append(here.parents[2])                       # bare-clone fallback (skills/ has no assets)
     if len(here.parents) > 3:
-        candidates.append(here.parents[3])                   # clone layout: repo root holds assets/
-        # install.sh layout: <target>/.claude/skills/<skill>/scripts -> <target>/.claude/instagram-carousel
-        candidates.append(here.parents[3] / "instagram-carousel")
+        candidates.append(here.parents[3])                   # bare clone: repo root holds assets/
+        candidates.append(here.parents[3] / "instagram-carousel")   # install.sh: .claude/instagram-carousel
     if len(here.parents) > 4:
         candidates.append(here.parents[4] / "instagram-carousel")
     candidates.append(Path.home() / ".claude" / "instagram-carousel")

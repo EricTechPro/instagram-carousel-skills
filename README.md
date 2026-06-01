@@ -14,108 +14,69 @@ slides.
    slide-01.png … slide-08.png   (1080×1350, one consistent world)
 ```
 
-## Easiest install — just ask your agent
-
-In any project, tell Claude (or any coding agent):
-
-> **"Install the skills from https://github.com/EricTechPro/instagram-carousel-skills"**
-
-It will clone the repo and run the installer for you. If your agent prefers explicit steps, point
-it at the install guide:
-
-> **"Fetch and follow https://raw.githubusercontent.com/EricTechPro/instagram-carousel-skills/main/INSTALL.md"**
-
-That's the whole install. (Manual steps below if you'd rather do it yourself.)
-
-## Or download a release zip
-
-Prefer no agent and no clone? Grab a versioned release:
-
-1. Download the latest zip from [Releases](../../releases/latest).
-2. Unzip into your project's `.claude/` directory:
-   ```bash
-   cd your-project
-   unzip ~/Downloads/instagram-carousel-skills-v*.zip -d .claude/
-   ```
-   This drops the two skills into `.claude/skills/` and the shared assets into
-   `.claude/instagram-carousel/` (the skills resolve that path automatically).
-3. `pip install Pillow`, then set up HiggsField (CLI or MCP) per the steps below.
-
-See [RELEASE-NOTES.md](RELEASE-NOTES.md) for what's in each version.
-
-## From zero (clean machine, nothing pre-installed)
-
-If you're starting in a fresh project that has **no Superpowers and no HiggsField**, this is the
-whole list:
-
-1. **Get the skills** (pick one):
-   - Plugin: `/plugin marketplace add EricTechPro/instagram-carousel-skills` then
-     `/plugin install instagram-carousel@instagram-carousel-skills`
-   - Or clone + script:
-     `git clone https://github.com/EricTechPro/instagram-carousel-skills && cd instagram-carousel-skills && ./install.sh /path/to/your/project`
-2. **Python + Pillow** (for cropping/compositing): `pip install -r requirements.txt`
-   (or `pip install Pillow`).
-3. **HiggsField** (only needed to *generate* images, not to *plan*): either
-   `npm install -g @higgsfield/cli && higgsfield auth login`, **or** connect the HiggsField MCP in
-   your host (Clockwork/cowork). Verify the CLI with `higgsfield account status`.
-4. Optional: `gh` and/or a web-search tool, for source research in the plan step.
-
-You do **not** need Superpowers or any sibling project. That's it — then say
-"plan an instagram carousel for &lt;topic&gt;".
+You do **not** need Superpowers or any sibling project.
 
 ## Install
 
-### Claude Code (plugin)
+Pick one. All three drop the two skills into `.claude/skills/` and the shared assets (fonts,
+style references, logos) into `.claude/instagram-carousel/`, which the generate skill finds
+automatically.
+
+**A — Ask your agent (easiest).** In any project, tell Claude (or any coding agent):
+
+> *"Install the skills from https://github.com/EricTechPro/instagram-carousel-skills"*
+
+It clones the repo and runs the installer. (It follows [INSTALL.md](INSTALL.md).)
+
+**B — Plugin (Claude Code, Clockwork, cowork).**
 
 ```bash
 /plugin marketplace add EricTechPro/instagram-carousel-skills
 /plugin install instagram-carousel@instagram-carousel-skills
 ```
 
-### Any project (clone + script)
+**C — Clone + script, or release zip.**
 
 ```bash
 git clone https://github.com/EricTechPro/instagram-carousel-skills
 cd instagram-carousel-skills
-./install.sh /path/to/your/project     # or: ./install.sh --global
-export IG_CAROUSEL_ASSETS="$HOME/.claude/instagram-carousel"   # if you used --global
+./install.sh /path/to/your/project     # or: ./install.sh --global  (~/.claude)
 ```
 
-### Clockwork / cowork
+Prefer no clone? Download the latest [release zip](../../releases/latest) and
+`unzip instagram-carousel-skills-v*.zip -d your-project/.claude/`.
 
-Clockwork and cowork are Claude Code hosts, so the **plugin marketplace flow above works there
-too** — run the same two `/plugin` commands. Then connect HiggsField at the host level (see
-below). *(Any cowork-specific "add skill repo" UI beyond the standard plugin flow is not verified
-here — use the plugin marketplace path, which is supported everywhere.)*
+Then install Python + Pillow (used to crop/compose slides and build the contact sheet):
 
-## HiggsField setup (required for `generate`)
+```bash
+pip install -r requirements.txt    # or: pip install Pillow
+```
 
-The generate skill renders slides with HiggsField GPT Image 2. Use **either**:
+That's it for planning. To **generate** images you also need HiggsField (below).
+
+> Assets resolve automatically (`.claude/instagram-carousel/`). Only set
+> `IG_CAROUSEL_ASSETS` if you keep the assets somewhere non-standard.
+
+## HiggsField setup (only needed to generate)
+
+The generate skill renders backgrounds with HiggsField GPT Image 2. Use **either**:
 
 - **CLI:** `npm install -g @higgsfield/cli` then `higgsfield auth login`
   (verify with `higgsfield account status`).
 - **MCP (Clockwork/cowork):** connect the **HiggsField MCP** in your host's connector settings.
 
 The skill auto-detects which is available and checks it **before** spending any credits.
-Full notes: [`skills/instagram-carousel-generate/references/higgsfield-setup.md`](skills/instagram-carousel-generate/references/higgsfield-setup.md).
+Full notes: [`references/higgsfield-setup.md`](skills/instagram-carousel-generate/references/higgsfield-setup.md).
 
 ## How it works (60 seconds)
 
 1. **Plan** asks at most four questions (audience+pain, payoff+proof, sequence, CTA goal),
    researches any links/repos you give it, and writes save-worthy copy using embedded carousel
    copywriting frameworks. It emits `carousel-spec.md` and shows you a skimmable ASCII layout.
-2. You approve the copy (cheap — no images yet).
+2. You approve the copy (cheap — no images yet) and can edit any field directly in the spec.
 3. **Generate** renders the cover first so you can lock the look, then renders the rest of the
    deck against a fixed reference set + pinned seed so every slide shares one world, character,
-   and type. Output is cropped to exactly 1080×1350.
-
-## Requirements
-
-- A Claude Code host (CLI, app, Clockwork, cowork…).
-- HiggsField — CLI **or** MCP (above).
-- Python 3 + Pillow (`pip install -r requirements.txt`) — used to crop slides and build a
-  contact sheet.
-- Optional: `gh` and/or a web search/firecrawl tool for source research.
+   and type. Output is cropped to exactly 1080×1350, plus a contact sheet.
 
 ## The two skills
 
@@ -130,6 +91,13 @@ Full notes: [`skills/instagram-carousel-generate/references/higgsfield-setup.md`
 - Not a Reels/video tool — static carousels only.
 - Not a general image generator — it is opinionated to one branded visual system (editable in
   `skills/instagram-carousel-generate/references/visual-system.md`).
+
+## Requirements
+
+- A Claude Code host (CLI, app, Clockwork, cowork…).
+- Python 3 + Pillow (`pip install -r requirements.txt`).
+- HiggsField (CLI or MCP) — only to *generate*, not to *plan*.
+- Optional: `gh` and/or a web-search tool for source research in the plan step.
 
 ## Credits
 
