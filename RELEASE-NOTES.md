@@ -1,5 +1,16 @@
 # Release notes
 
+## v0.3.1 — 2026-06-01
+
+### Fix: a single odd HiggsField response no longer crashes the batch
+
+- **`generate_carousel.py`** — `hf_generate()` now always returns a dict. The CLI can return a
+  single object, a list of jobs, or an **empty list** (a transient miss); previously an empty list
+  reached `main()`, which called `.get()` on it and aborted the whole render with `AttributeError`,
+  killing every remaining slide. Now a bad/empty response is treated as a failed slide — that one is
+  skipped and the batch continues (re-roll it later with `--only N`).
+- Corrected a stale inline comment ("crops to 1080x1350" → resizes to the full 3:4 plate).
+
 ## v0.3.0 — 2026-06-01
 
 ### Brand-portable rendering + a second worked example

@@ -269,7 +269,13 @@ def hf_generate(prompt: str, ref_paths: list[Path]) -> dict:
         data = json.loads(r.stdout)
     except json.JSONDecodeError:
         return {"status": "failed", "raw": (r.stdout + r.stderr)[:400]}
-    return data[0] if isinstance(data, list) and data else data
+    # The CLI may return a single object, a list of jobs, or an empty list (transient miss).
+    # Always hand back a dict so one odd response can't crash the whole batch in main().
+    if isinstance(data, list):
+        data = data[0] if data else {}
+    if not isinstance(data, dict):
+        return {"status": "failed", "raw": str(data)[:400]}
+    return data
 
 
 def hf_fetch_plate(data: dict, dest: Path) -> str:
@@ -388,7 +394,7 @@ def main(argv=None):
             cs.compose(slide, "", str(out_png), assets)
         else:
             # GPT Image 2 renders the WHOLE slide — world, mascot AND all the text — from a
-            # full-slide prompt. Pillow only crops the result to 1080x1350.
+            # full-slide prompt. Pillow only resizes the result to 1080-wide (full 3:4 plate).
             data = hf_generate(build_slide_prompt(slide, meta), ref_paths)
             if str(data.get("status", "")).lower() not in ("success", "completed", "done"):
                 print(f"  ✗ slide {i:02d} generation status={data.get('status')}; skipping")
