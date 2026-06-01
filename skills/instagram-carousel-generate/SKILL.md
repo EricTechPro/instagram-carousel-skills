@@ -1,6 +1,6 @@
 ---
 name: instagram-carousel-generate
-description: Use when the user has an approved carousel-spec.md and wants the slide images rendered — generates a branded background per slide with HiggsField GPT Image 2, then overlays exact text + logos with Pillow, cropping each to 1080x1350. Locks one consistent world/character/type across the deck via a fixed reference set + pinned seed. Checks HiggsField (CLI or MCP) and gates on a cost estimate before spending credits. Triggers on "generate the carousel", "render the slides", or /instagram-carousel-generate. To write or change the copy first, use instagram-carousel-plan.
+description: Generate Instagram carousel slide images from an approved carousel-spec.md. Use when the user says "generate the carousel", "render the slides", "make the carousel images", or /instagram-carousel-generate. Renders branded 1080x1350 slides via HiggsField GPT Image 2 plus a Pillow text/logo overlay. To write or edit the copy first, use instagram-carousel-plan.
 ---
 
 # Instagram Carousel — Generate

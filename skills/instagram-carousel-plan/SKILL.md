@@ -1,6 +1,6 @@
 ---
 name: instagram-carousel-plan
-description: Use when the user wants to plan an Instagram carousel — turns a topic + optional sources/links/repos into a research wiki + a reviewable carousel-spec.md (per-slide copy, post caption, hashtags, DM-trigger, ASCII layout) using embedded carousel copywriting frameworks. Asks at most 4 questions, researches sources, writes save-worthy copy, and hands off to instagram-carousel-generate. Triggers on "plan an instagram carousel", "carousel for <topic>", "instagram carousel research/spec", or /instagram-carousel-plan. For rendering the slides, use instagram-carousel-generate.
+description: Plan an Instagram carousel. Use when the user says "plan an instagram carousel", "carousel for <topic>", "instagram carousel", or /instagram-carousel-plan. Researches the topic/sources and writes the per-slide copy, caption, hashtags, and DM-trigger into a reviewable carousel-spec.md. Hand the spec to instagram-carousel-generate to render the images.
 ---
 
 # Instagram Carousel — Plan
