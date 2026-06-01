@@ -102,10 +102,51 @@ def check_prereqs(dry_run: bool) -> list[str]:
 
 
 # ---- generation (CLI) -------------------------------------------------------
+# Locked preamble — keep in sync with references/plate-templates.md. The model renders the
+# world only (no text, no logos); Pillow draws all copy and pastes real logos.
+PLATE_PREAMBLE = (
+    "3D voxel render, bright blue sky with soft white clouds, green grass strip along the "
+    "bottom, cheerful sunny scene, soft shadows, shallow depth of field. A blocky "
+    'Minecraft-style orange mascot character ("Clawd"). Clean blank cream/off-white paper card '
+    "with a smooth empty surface and NO text, NO lettering, NO logos. Portrait composition. "
+    "Match the style of the reference images."
+)
+PLATE_BY_TYPE = {
+    "cover": "Crowned mascot standing on a pile of small code blocks, arms raised; big empty area at the top for a headline.",
+    "item":  "Mascot beside a wooden sign on a post (or holding a pinned note); large blank cream card filling the upper two-thirds, empty.",
+    "howto": "Three small wooden signposts in a row on the grass, each with a small blank card; mascots beside them.",
+    "cta":   "Mascot holding a large blank speech-bubble sign overhead, empty surface.",
+}
+
+
+def build_plate_prompt(slide: dict) -> str:
+    """Per-type background plate prompt (no text/logos) — see plate-templates.md."""
+    return PLATE_PREAMBLE + " " + PLATE_BY_TYPE.get(slide.get("type", "item"), PLATE_BY_TYPE["item"])
+
+
+def resolve_ref_set(assets: Path) -> list[Path]:
+    """The fixed few-shot deck passed on every generation to lock the world (no drift)."""
+    for d in (assets / "assets" / "style-reference", assets / "style-reference"):
+        if d.is_dir():
+            return sorted(p for p in d.iterdir() if p.suffix.lower() in (".jpg", ".jpeg", ".png"))
+    return []
+
+
 def hf_cost(prompt: str) -> str:
     r = subprocess.run(["higgsfield", "generate", "cost", "gpt_image_2",
                         "--prompt", prompt, "--json"], capture_output=True, text=True)
     return r.stdout.strip()
+
+
+def hf_upload(path: Path) -> str:
+    """Upload one reference image, return its id (per higgsfield-setup.md)."""
+    r = subprocess.run(["higgsfield", "upload", str(path), "--json"],
+                       capture_output=True, text=True)
+    try:
+        data = json.loads(r.stdout)
+    except json.JSONDecodeError:
+        return ""
+    return data.get("id") or data.get("image_id") or ""
 
 
 def hf_generate(prompt: str, ref_ids: list[str], seed: int, out_png: Path) -> dict:
@@ -120,6 +161,23 @@ def hf_generate(prompt: str, ref_ids: list[str], seed: int, out_png: Path) -> di
     except json.JSONDecodeError:
         return {"status": "failed", "raw": r.stdout + r.stderr}
     return data
+
+
+def hf_fetch_plate(data: dict, dest: Path) -> str:
+    """Resolve the generated background to a local file: a local path is used as-is; a URL
+    is downloaded to dest. Returns the local path, or "" if nothing usable was returned."""
+    src = data.get("output_path") or data.get("local_path") or data.get("url") or ""
+    if not src:
+        return ""
+    if src.startswith(("http://", "https://")):
+        import urllib.request
+        plate = dest.with_suffix(".plate.png")
+        try:
+            urllib.request.urlretrieve(src, plate)
+            return str(plate)
+        except OSError:
+            return ""
+    return src if Path(src).exists() else ""
 
 
 # ---- verify + contact sheet -------------------------------------------------
@@ -160,9 +218,21 @@ def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("spec")
     ap.add_argument("--dry-run", action="store_true", help="compose over blank plates, no credits")
+    ap.add_argument("--allow-cli-spend", action="store_true",
+                    help="opt in to spending HiggsField credits via this CLI driver (omit to stay free)")
     ap.add_argument("--only", type=int, default=0, help="render only slide N")
     ap.add_argument("--seed", type=int, default=42)
     args = ap.parse_args(argv)
+
+    # Spend guard: without --dry-run or --allow-cli-spend, never call the paid API. The supported
+    # generation path is the agent/MCP flow in SKILL.md (cost gate + fixed refs + pinned seed);
+    # this CLI driver renders backgrounds only when you explicitly opt in.
+    if not args.dry_run and not args.allow_cli_spend:
+        print("Refusing to spend credits without an explicit opt-in.\n"
+              "  • Preview free (white plates):  --dry-run\n"
+              "  • Spend credits via this CLI:   --allow-cli-spend\n"
+              "  • Or drive generation from your agent per SKILL.md (cost-gated, recommended).")
+        return 2
 
     spec_path = Path(args.spec)
     parsed = parse_spec(spec_path)
@@ -179,9 +249,15 @@ def main(argv=None):
         return 1
 
     print(f"Spec: {meta.get('topic','?')} — {len(slides)} slides → {out_dir}")
+    ref_ids: list[str] = []
     if not args.dry_run:
-        print("Cost estimate (per slide):", hf_cost("plate") or "run `higgsfield generate cost` to see")
-        print(f"This will generate ~{len(slides)} backgrounds. Re-run with credits confirmed.")
+        per = hf_cost(build_plate_prompt({"type": "item"}))
+        print("Cost estimate (per slide):", per or "run `higgsfield generate cost` to see")
+        print(f"This will generate ~{len(slides)} backgrounds.")
+        # Upload the fixed reference set once; reuse the ids on every slide (locks the world).
+        refs = resolve_ref_set(assets)
+        ref_ids = [rid for rid in (hf_upload(p) for p in refs) if rid]
+        print(f"Reference set: {len(ref_ids)}/{len(refs)} images uploaded")
 
     rendered = []
     for i, slide in enumerate(slides, 1):
@@ -195,12 +271,11 @@ def main(argv=None):
 
         bg = ""
         if not args.dry_run:
-            # NOTE: upload the fixed reference set once and reuse ref ids here.
-            data = hf_generate("plate prompt — see plate-templates.md", [], args.seed, out_png)
+            data = hf_generate(build_plate_prompt(slide), ref_ids, args.seed, out_png)
             if str(data.get("status", "")).lower() not in ("success", "completed", "done"):
                 print(f"  ✗ slide {i:02d} generation status={data.get('status')}; skipping")
                 continue
-            bg = data.get("output_path") or data.get("local_path") or ""
+            bg = hf_fetch_plate(data, out_png)
 
         slide.setdefault("handle", meta.get("handle", ""))
         cs.compose(slide, bg, str(out_png), assets)
