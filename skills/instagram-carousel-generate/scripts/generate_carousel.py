@@ -169,35 +169,27 @@ def hf_cost(prompt: str) -> str:
     return r.stdout.strip()
 
 
-def hf_upload(path: Path) -> str:
-    """Upload one reference image, return its id (per higgsfield-setup.md)."""
-    r = subprocess.run(["higgsfield", "upload", str(path), "--json"],
-                       capture_output=True, text=True)
-    try:
-        data = json.loads(r.stdout)
-    except json.JSONDecodeError:
-        return ""
-    return data.get("id") or data.get("image_id") or ""
-
-
-def hf_generate(prompt: str, ref_ids: list[str], seed: int, out_png: Path) -> dict:
+def hf_generate(prompt: str, ref_paths: list[Path]) -> dict:
+    """Generate one background plate. `--image` accepts local paths (auto-uploaded), so we
+    pass the fixed reference set directly — no separate upload step. gpt_image_2 has no
+    `seed` param, so consistency rides on the same refs + same locked prompt every slide."""
     cmd = ["higgsfield", "generate", "create", "gpt_image_2", "--prompt", prompt,
            "--aspect_ratio", "3:4", "--resolution", "2k", "--quality", "high",
-           "--batch_size", "2", "--seed", str(seed), "--wait", "--json"]
-    for rid in ref_ids:
-        cmd += ["--image", rid]
+           "--batch_size", "1", "--wait", "--wait-timeout", "5m", "--json"]
+    for p in ref_paths:
+        cmd += ["--image", str(p)]
     r = subprocess.run(cmd, capture_output=True, text=True)
     try:
         data = json.loads(r.stdout)
     except json.JSONDecodeError:
-        return {"status": "failed", "raw": r.stdout + r.stderr}
-    return data
+        return {"status": "failed", "raw": (r.stdout + r.stderr)[:400]}
+    return data[0] if isinstance(data, list) and data else data
 
 
 def hf_fetch_plate(data: dict, dest: Path) -> str:
     """Resolve the generated background to a local file: a local path is used as-is; a URL
     is downloaded to dest. Returns the local path, or "" if nothing usable was returned."""
-    src = data.get("output_path") or data.get("local_path") or data.get("url") or ""
+    src = data.get("result_url") or data.get("output_path") or data.get("local_path") or data.get("url") or ""
     if not src:
         return ""
     if src.startswith(("http://", "https://")):
@@ -252,7 +244,6 @@ def main(argv=None):
     ap.add_argument("--allow-cli-spend", action="store_true",
                     help="opt in to spending HiggsField credits via this CLI driver (omit to stay free)")
     ap.add_argument("--only", type=int, default=0, help="render only slide N")
-    ap.add_argument("--seed", type=int, default=42)
     args = ap.parse_args(argv)
 
     # Spend guard: without --dry-run or --allow-cli-spend, never call the paid API. The supported
@@ -280,15 +271,14 @@ def main(argv=None):
         return 1
 
     print(f"Spec: {meta.get('topic','?')} — {len(slides)} slides → {out_dir}")
-    ref_ids: list[str] = []
+    ref_paths: list[Path] = []
     if not args.dry_run:
         per = hf_cost(build_plate_prompt({"type": "item"}))
         print("Cost estimate (per slide):", per or "run `higgsfield generate cost` to see")
         print(f"This will generate ~{len(slides)} backgrounds.")
-        # Upload the fixed reference set once; reuse the ids on every slide (locks the world).
-        refs = resolve_ref_set(assets, spec_path)
-        ref_ids = [rid for rid in (hf_upload(p) for p in refs) if rid]
-        print(f"Reference set: {len(ref_ids)}/{len(refs)} images uploaded")
+        # Fixed reference set passed on every slide (same refs + locked prompt = consistent world).
+        ref_paths = resolve_ref_set(assets, spec_path)
+        print(f"Reference set: {len(ref_paths)} images")
 
     rendered = []
     for i, slide in enumerate(slides, 1):
@@ -302,7 +292,7 @@ def main(argv=None):
 
         bg = ""
         if not args.dry_run:
-            data = hf_generate(build_plate_prompt(slide), ref_ids, args.seed, out_png)
+            data = hf_generate(build_plate_prompt(slide), ref_paths)
             if str(data.get("status", "")).lower() not in ("success", "completed", "done"):
                 print(f"  ✗ slide {i:02d} generation status={data.get('status')}; skipping")
                 continue
