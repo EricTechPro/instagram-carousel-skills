@@ -196,6 +196,69 @@ def crop_cover(bg: Image.Image) -> Image.Image:
     return nb.crop((left, top, left + W, top + H))
 
 
+def detect_card_box(img: Image.Image):
+    """Find the cream/paper card in a generated plate so text lands ON it, not on the sky.
+
+    The card is warm-bright (cream); sky/clouds are cool (blue ≥ red); the orange mascot
+    and green grass fail the brightness gate. We mask warm-bright pixels, take the largest
+    connected blob, and return its full-res bbox — or None (e.g. dry-run white plates) so
+    the caller falls back to a fixed frame. Pure stdlib, no numpy/scipy.
+    """
+    SW = 240
+    sh = max(1, round(SW * H / W))
+    small = img.convert("RGB").resize((SW, sh), Image.BILINEAR)
+    px = small.load()
+
+    def cardish(r, g, b):
+        return g > 175 and r > 190 and r >= b - 8        # warm + bright; excludes sky/clouds/orange/grass
+
+    mask = [[cardish(*px[x, y]) for x in range(SW)] for y in range(sh)]
+
+    # largest 4-connected component (iterative flood fill)
+    seen = [[False] * SW for _ in range(sh)]
+    best = None  # (area, x0, y0, x1, y1)
+    for sy in range(sh):
+        for sx in range(SW):
+            if not mask[sy][sx] or seen[sy][sx]:
+                continue
+            stack = [(sx, sy)]
+            seen[sy][sx] = True
+            area = 0
+            x0 = x1 = sx
+            y0 = y1 = sy
+            while stack:
+                cx, cy = stack.pop()
+                area += 1
+                x0, x1 = min(x0, cx), max(x1, cx)
+                y0, y1 = min(y0, cy), max(y1, cy)
+                for nx, ny in ((cx + 1, cy), (cx - 1, cy), (cx, cy + 1), (cx, cy - 1)):
+                    if 0 <= nx < SW and 0 <= ny < sh and mask[ny][nx] and not seen[ny][nx]:
+                        seen[ny][nx] = True
+                        stack.append((nx, ny))
+            if best is None or area > best[0]:
+                best = (area, x0, y0, x1, y1)
+
+    if not best:
+        return None
+    _, x0, y0, x1, y1 = best
+    sx_scale, sy_scale = W / SW, H / sh
+    bx0, by0, bx1, by1 = x0 * sx_scale, y0 * sy_scale, x1 * sx_scale, y1 * sy_scale
+    # must be a plausibly-large rectangle, else trust the fixed frame
+    if (bx1 - bx0) < 0.34 * W or (by1 - by0) < 0.22 * H:
+        return None
+    return (bx0, by0, bx1, by1)
+
+
+def text_frame(img: Image.Image):
+    """The rectangle text is laid into: the detected card (inset), else a safe fixed frame."""
+    box = detect_card_box(img)
+    if box:
+        x0, y0, x1, y1 = box
+        pad = max(30, int((x1 - x0) * 0.06))
+        return (int(x0 + pad), int(y0 + pad), int(x1 - pad), int(y1 - pad)), True
+    return (MARGIN, 180, W - MARGIN, BOTTOM_SAFE), False
+
+
 def compose(slide: dict, background: str, out: str, assets: Path) -> dict:
     accent = safe_accent(slide.get("accent_hex") or DEFAULT_ACCENT)
     img = crop_cover(Image.open(background)) if background and Path(background).exists() \
@@ -210,89 +273,94 @@ def compose(slide: dict, background: str, out: str, assets: Path) -> dict:
         drawn.append(("badge", (W // 2, 70)))
 
     stype = slide.get("type", "item")
-    y = 200
+    # Lay text INTO the detected cream card (so it lands on the card, not the sky); fall
+    # back to a fixed frame when no card is found (e.g. dry-run white plates).
+    (fx0, fy0, fx1, fy1), on_card = text_frame(img)
+    fw = fx1 - fx0
+    y = fy0
 
     if stype == "cover":
-        fnt, lines, size = fit_headline(draw, assets, slide.get("headline", ""),
-                                        W - 2 * MARGIN, 120, 56, 3)
+        fnt, lines, size = fit_headline(draw, assets, slide.get("headline", ""), fw, 120, 52, 3)
         for ln in lines:
-            draw.text((MARGIN, y), ln, font=fnt, fill=TEXT)
+            draw.text((fx0, y), ln, font=fnt, fill=TEXT)
             y += int(size * 1.05)
-        drawn.append(("headline", (MARGIN, 200)))
-        sub = slide.get("subhead") or ""
-        if sub:
-            sf = font(assets, "grotesk", 40)
-            for ln in wrap(draw, sub, sf, W - 2 * MARGIN):
-                draw.text((MARGIN, y), ln, font=sf, fill=MUTED)
-                y += 52
-            drawn.append(("subhead", (MARGIN, y)))
-        tail = slide.get("open_loop_tail") or "swipe →"
-        tf = font(assets, "grotesk-bold", 32)
-        draw.text((W - MARGIN - draw.textlength(tail, font=tf), BOTTOM_SAFE + 120),
-                  tail, font=tf, fill=accent)
-
-    elif stype == "cta":
-        eb = font(assets, "mono", 26)
-        draw_tracked(draw, (MARGIN, y), "WANT THE LINKS?", eb, MUTED, 2.0)
-        y += 70
-        fnt, lines, size = fit_headline(draw, assets, slide.get("headline", ""),
-                                        W - 2 * MARGIN, 100, 52, 3)
-        for ln in lines:
-            draw.text((MARGIN, y), ln, font=fnt, fill=accent)
-            y += int(size * 1.05)
-        drawn.append(("headline", (MARGIN, y)))
+        drawn.append(("headline", (fx0, fy0)))
         sub = slide.get("subhead") or ""
         if sub:
             sf = font(assets, "grotesk", 38)
-            for ln in wrap(draw, sub, sf, W - 2 * MARGIN):
-                draw.text((MARGIN, y), ln, font=sf, fill=TEXT)
+            for ln in wrap(draw, sub, sf, fw):
+                draw.text((fx0, y), ln, font=sf, fill=MUTED)
                 y += 50
+            drawn.append(("subhead", (fx0, y)))
+        tail = slide.get("open_loop_tail") or "swipe →"
+        tf = font(assets, "grotesk-bold", 32)
+        draw.text((W - MARGIN - draw.textlength(tail, font=tf), 1185), tail, font=tf, fill=accent)
+
+    elif stype == "cta":
+        eb = font(assets, "mono", 26)
+        draw_tracked(draw, (fx0, y), "WANT THE LINKS?", eb, MUTED, 2.0)
+        y += 64
+        fnt, lines, size = fit_headline(draw, assets, slide.get("headline", ""), fw, 96, 48, 3)
+        for ln in lines:
+            draw.text((fx0, y), ln, font=fnt, fill=accent)
+            y += int(size * 1.05)
+        drawn.append(("headline", (fx0, y)))
+        sub = slide.get("subhead") or ""
+        if sub:
+            sf = font(assets, "grotesk", 36)
+            for ln in wrap(draw, sub, sf, fw):
+                draw.text((fx0, y), ln, font=sf, fill=TEXT)
+                y += 48
         save = font(assets, "grotesk-bold", 30)
-        draw.text((W - MARGIN - draw.textlength("save this post", font=save), BOTTOM_SAFE + 120),
+        draw.text((W - MARGIN - draw.textlength("save this post", font=save), 1185),
                   "save this post", font=save, fill=accent)
 
     else:  # item / howto
-        label = slide.get("badge") or ""
         fnt, lines, size = fit_headline(draw, assets, slide.get("headline", ""),
-                                        W - 2 * MARGIN, 76, 44, 2, family="archivo-bold")
+                                        fw, 72, 40, 2, family="archivo-bold")
         for ln in lines:
-            draw.text((MARGIN, y), ln, font=fnt, fill=TEXT)
+            draw.text((fx0, y), ln, font=fnt, fill=TEXT)
             y += int(size * 1.1)
-        drawn.append(("headline", (MARGIN, 200)))
+        drawn.append(("headline", (fx0, fy0)))
         sub = slide.get("subhead") or ""
         if sub:
-            sf = font(assets, "grotesk-bold", 36)
-            for ln in wrap(draw, sub, sf, W - 2 * MARGIN):
-                draw.text((MARGIN, y), ln, font=sf, fill=accent)
-                y += 46
-            drawn.append(("subhead", (MARGIN, y)))
-        y += 12
+            sf = font(assets, "grotesk-bold", 34)
+            for ln in wrap(draw, sub, sf, fw):
+                draw.text((fx0, y), ln, font=sf, fill=accent)
+                y += 44
+            drawn.append(("subhead", (fx0, y)))
+        y += 10
         for b in (slide.get("bullets") or [])[:3]:
-            bf = font(assets, "grotesk", 34)
-            accent_marker(draw, MARGIN, y + 10, 22, accent)
-            for i, ln in enumerate(wrap(draw, b, bf, W - 2 * MARGIN - 50)):
-                draw.text((MARGIN + 44, y), ln, font=bf, fill=TEXT)
-                y += 46
-            drawn.append(("bullet", (MARGIN, y)))
+            bf = font(assets, "grotesk", 32)
+            accent_marker(draw, fx0, y + 10, 20, accent)
+            for ln in wrap(draw, b, bf, fw - 46):
+                draw.text((fx0 + 40, y), ln, font=bf, fill=TEXT)
+                y += 42
+            drawn.append(("bullet", (fx0, y)))
         url = slide.get("url") or ""
         if url:
-            uf = font(assets, "mono", 24)
-            draw.text((MARGIN, min(y + 16, BOTTOM_SAFE - 40)), url, font=uf, fill=MUTED)
-            drawn.append(("url", (MARGIN, y)))
+            uf = font(assets, "mono", 22)
+            draw.text((fx0, min(y + 14, fy1 - 30)), url, font=uf, fill=MUTED)
+            drawn.append(("url", (fx0, y)))
         tail = slide.get("open_loop_tail") or ""
         if tail:
             tf = font(assets, "grotesk", 28)
-            draw.text((MARGIN, BOTTOM_SAFE + 100), tail, font=tf, fill=MUTED)
+            ty = min(fy1 + 34, 1235) if on_card else BOTTOM_SAFE + 100
+            draw.text((fx0, ty), tail, font=tf, fill=MUTED)
 
-    # featured logo (real PNG, never generated)
+    # featured logo (real PNG, never generated) — bottom-right inside the card when detected
     lp = logo_path(assets, slide.get("logo_file", ""))
     if lp:
         try:
             logo = Image.open(lp).convert("RGBA")
-            target = 120
+            target = 110
             logo.thumbnail((target, target), Image.LANCZOS)
-            img.paste(logo, (W - MARGIN - logo.width, BOTTOM_SAFE - logo.height - 10), logo)
-            drawn.append(("logo", (W - MARGIN, BOTTOM_SAFE)))
+            if on_card and stype not in ("cover", "cta"):
+                lx, ly = fx1 - logo.width, fy1 - logo.height
+            else:
+                lx, ly = W - MARGIN - logo.width, BOTTOM_SAFE - logo.height - 10
+            img.paste(logo, (max(0, lx), max(0, ly)), logo)
+            drawn.append(("logo", (lx, ly)))
         except OSError:
             pass
 
