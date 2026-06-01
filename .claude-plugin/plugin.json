@@ -1,7 +1,7 @@
 {
   "name": "instagram-carousel",
   "description": "Plan and generate on-brand Instagram carousels: research + copywriting into a spec, then fully-rendered 1080x1350 slides via HiggsField GPT Image 2.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": {
     "name": "EricTechPro"
   },
