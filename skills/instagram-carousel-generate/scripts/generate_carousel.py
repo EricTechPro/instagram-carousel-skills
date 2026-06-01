@@ -39,7 +39,7 @@ def _coerce(v: str):
         except json.JSONDecodeError:
             return v.strip("[]")
     # Quoted value: return the inner string up to the closing quote, ignoring any trailing
-    # inline comment (e.g. `handle: "@erictech"   # default from BRAND.md`).
+    # inline comment (e.g. `handle: "@erictechpro" # default from BRAND.md`).
     if v[:1] in ('"', "'"):
         q = v[0]
         end = v.find(q, 1)

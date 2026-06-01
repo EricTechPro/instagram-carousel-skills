@@ -43,8 +43,10 @@ The default look is defined by `_reference-style/` (project root, swappable per 
   per document. This creativity is the point — make each slide its own scene.
 - **Terminal slides** render the `terminal` field as the **Claude Code CLI**: dark window, traffic-light
   dots + a small Claude sunburst logo, the `> command` in mono, and an **"Opus 4.8" status bar**.
-- **Brand marks:** `@erictech` small in **white** at the bottom-left. **No** redundant editorial tail or
-  bottom arrows (just `swipe →` on the cover). Accent + handle + mascot all come from `BRAND.md`.
+- **Brand marks:** the **`handle`** — the user's actual **Instagram account username** — small in
+  high-contrast text (white on the default look) at the bottom-left of **every** slide, identical
+  across the deck. **No** redundant editorial tail or bottom arrows (just `swipe →` on the cover).
+  Accent + handle + mascot all come from the active profile (`BRAND.md` / `BRAND.<name>.md`).
 - **Output the FULL plate** — generate 3:4, resize to 1080 wide (~1080×1447). **Never crop to 4:5**;
   that slices the headline top and the handle bottom.
 
@@ -66,10 +68,18 @@ slides) a `terminal` string. Resolve the `_reference-style/` deck — it's the f
 Run `higgsfield generate cost gpt_image_2 …` once, multiply by slide count, show the **total + count**,
 and require **one explicit confirmation** before the batch. Carousels are exactly where a surprise bill bites.
 
-### 3. Cover first — lock the look
+### 3. Cover first — lock the look (and the handle)
 Generate **only the cover** (`generate_carousel.py <spec> --allow-cli-spend --only 1`). Show it. The
 cover proves the style/world/typography cheaply. Adjust the spec (headline, `character_pose`) and
 re-roll the cover until it's right **before** spending on the rest.
+
+**Read the `handle` off the cover and confirm it's the right Instagram account** while you're here.
+Every line of text — the handle included — is rendered *into* each image by GPT Image 2; there's no
+text layer to patch afterward. So a wrong handle (or any wrong brand field: mascot/style/accent) isn't
+a one-pixel fix — it means **re-rendering every slide** to keep the deck consistent. The cover is the
+cheap place (~7 credits) to catch that before the full batch (~7 × N). Reassurance for when you do
+re-render: the **quoted prompt strings win over the reference deck**, so a corrected handle letters
+correctly even if the locked anchor still shows the old one.
 
 ### 4. Render the rest
 Run `generate_carousel.py <spec> --allow-cli-spend` (skips already-rendered slides). Per slide it
@@ -80,7 +90,8 @@ re-run resumes the missing ones. **Single-slide re-roll:** `--only N` (≈7 cred
 ### 5. Verify (gates "done")
 - Each file: PNG, non-zero, **1080-wide portrait** (≈1080×1447).
 - Generation reached a **success** terminal status (not nsfw / ip_detected / failed).
-- Eyeball each: text spelled right, headline big, scene clean (not cluttered), accent + mascot on-brand.
+- Eyeball each: text spelled right, headline big, scene clean (not cluttered), accent + mascot on-brand,
+  and the **same `handle` on every slide** (a deck posts as one set — a mismatched handle is a re-roll).
 - Build a **contact-sheet montage** → `output/_contact-sheet.png`. Report credits spent vs the estimate.
 
 ### 6. Deliver

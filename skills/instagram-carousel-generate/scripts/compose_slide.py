@@ -12,7 +12,7 @@ Usage:
 A slide dict looks like:
     {"type":"item","badge":"01/5","headline":"...","subhead":"...","bullets":["..."],
      "open_loop_tail":"...","accent_hex":"#2BAADF","logo_file":"github-logo.png",
-     "url":"github.com/owner/repo","handle":"@erictech","mimic_ui":"none"}
+     "url":"github.com/owner/repo","handle":"@erictechpro","mimic_ui":"none"}
 """
 from __future__ import annotations
 

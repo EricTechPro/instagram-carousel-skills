@@ -21,7 +21,7 @@ cta_goal: reach            # save-bait | reach | traffic
 # --- brand block: filled from the active BRAND profile (BRAND.md, or BRAND.<name>.md). Generate
 #     reads these from meta, so NOTHING brand-specific is hardcoded. Omit mascot/style/surface to
 #     fall back to the default (Eric Tech / Clawd voxel) look.
-handle: "@erictech"                   # from the brand profile — don't invent one
+handle: "@erictechpro"                # the real IG account username; from the brand profile — don't invent one
 accent_default: "#2BAADF"             # a hex, OR "monochrome" for pure black & white (emphasis = italic, no color)
 mascot: "Clawd — a cute rounded orange voxel mascot with tiny sunglasses"   # the recurring host
 style: "polished 3D voxel children's-book render, sunny blue sky + green grass"   # the whole aesthetic
@@ -125,8 +125,10 @@ dm_trigger: "REPOS"
 ````
 
 ## Rules for filling it
-- `handle` + `accent_default`: read from `BRAND.md` at the project root (ships as `@erictech` /
-  `#2BAADF`). Never invent a handle or accent — if `BRAND.md` is missing, ask the user once.
+- `handle` + `accent_default`: read from `BRAND.md` at the project root (ships as `@erictechpro` /
+  `#2BAADF`). The `handle` is the real **Instagram account username** the deck posts from; it gets
+  lettered into every slide, so it must be identical across all slides and confirmed before rendering.
+  Never invent a handle or accent — if `BRAND.md` is missing, ask the user once.
 - `logo_file` + `accent_hex`: look up the featured tool in
   `../instagram-carousel-generate/references/tool-brand-colors.md`. Fall back to the BRAND.md
   `default_accent` if the tool has none.
