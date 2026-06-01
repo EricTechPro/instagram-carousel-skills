@@ -9,21 +9,22 @@ one to **write the plan** and one to **generate** the slides.
 
   a folder of IG posts,        ┌──────────┐                 ┌──────────┐
   links, research files,  ───▶ │   plan   │ ───▶  spec  ───▶ │ generate │ ───▶  slide-01.png … slide-08.png
-  or just a topic              │  skill   │      (.md)        │  skill   │       1080×1350, one consistent world
+  or just a topic              │  skill   │      (.md)        │  skill   │       full 3:4 portrait, one consistent world
   "plan a carousel for X"      └──────────┘   you approve     └──────────┘       "generate the carousel"
                                               & can edit it
 ```
 
 The **plan** skill researches your topic/sources and writes the per-slide copy, caption, hashtags,
 and DM-trigger into a reviewable `carousel-spec.md`. You approve it (cheap — no images yet). The
-**generate** skill renders that spec into 1080×1350 slides via HiggsField, one consistent set.
+**generate** skill renders that spec into full 3:4 portrait slides via HiggsField GPT Image 2 — which
+letters every slide's text itself — as one consistent set.
 
 ## Prerequisites
 
 | Need | Why |
 |---|---|
 | **Claude Code** *or* **Claude Cowork** | the host that runs the two skills |
-| **Python 3.9+** with `pip` | crops + composes slides (Pillow) and builds the contact sheet |
+| **Python 3.9+** with `pip` | resizes the rendered plates (Pillow) and builds the contact sheet |
 | **HiggsField** — CLI *or* MCP | renders backgrounds — only needed to **generate**, not to **plan** |
 | *(optional)* `gh` / a web-search tool | source research during planning |
 
@@ -94,15 +95,32 @@ Approve the spec, then run the slash command — bare to use the latest spec, or
 /instagram-carousel-generate instagram-carousel/<slug>/carousel-spec.md
 ```
 
-It shows a cost estimate first, locks the cover, then renders the rest at 1080×1350 + a contact
-sheet. Text-only fixes re-compose for free; only background regens spend credits.
+It shows a cost estimate first, locks the cover (cheap — one slide), then renders the rest as full
+3:4 portrait slides + a contact sheet. GPT Image 2 letters every slide's text *into* the image, so a
+copy edit means re-rolling that slide (a small credit spend) — there's no free text layer. That's why
+the cover is locked first and the `@handle` is confirmed before the full batch.
+
+## Examples
+
+Two complete runs ship in [`examples/`](examples), each laid out the same way — **input → spec → output**:
+
+- **[`claude-dynamic-workflows/`](examples/claude-dynamic-workflows)** — the default Eric Tech look (voxel "Clawd", blue accent).
+  - [`input/`](examples/claude-dynamic-workflows/input) — the research wiki the copy was built from (one `.md` per source)
+  - [`spec/carousel-spec.md`](examples/claude-dynamic-workflows/spec/carousel-spec.md) — the approved spec: slides + caption + hashtags + DM-trigger
+  - [`output/`](examples/claude-dynamic-workflows/output) — the rendered `slide-01.png … slide-NN.png` + `_contact-sheet.png`
+- **[`hermes-agent-use-cases/`](examples/hermes-agent-use-cases)** — a totally different brand from the *same* skills: vintage shoujo-manga, monochrome B&W, `@erictechpro`. Proof nothing is hardcoded.
+  - [`input/`](examples/hermes-agent-use-cases/input) — the research wiki (one `.md` per source)
+  - [`spec/carousel-spec.md`](examples/hermes-agent-use-cases/spec/carousel-spec.md) — the approved spec
+  - [`output/`](examples/hermes-agent-use-cases/output) — the rendered slides + `_contact-sheet.png`
+  - [`style-ref/`](examples/hermes-agent-use-cases/style-ref) — the per-brand reference deck (pointed at via `IG_CAROUSEL_STYLE`) that restyles the whole carousel **without touching** `_reference-style/`
 
 ## Under the hood
 
 - **Skills:** plan, then generate
-- **Image model:** HiggsField GPT Image 2
+- **Image model:** HiggsField GPT Image 2 — letters every slide's text itself (no Pillow text overlay)
 - **Render path:** Claude Code → CLI; Cowork → MCP
-- **Text + logos:** Python Pillow overlay
+- **Style:** the images in `_reference-style/` are passed as the reference set on every render — swap them to restyle
+- **Pillow:** resizes the returned plate to 1080-wide + builds the contact sheet
 - **Dependencies:** Python 3.9+, Pillow
 - **Planning:** zero image credits spent
 

@@ -1,6 +1,6 @@
 ---
 name: instagram-carousel-plan
-description: Plan an Instagram carousel. Use when the user says "plan an instagram carousel", "carousel for <topic>", "instagram carousel", or /instagram-carousel-plan. Researches the topic/sources and writes the per-slide copy, caption, hashtags, and DM-trigger into a reviewable carousel-spec.md. Hand the spec to instagram-carousel-generate to render the images.
+description: Plan an Instagram carousel — research a topic/sources and write the per-slide copy, caption, hashtags, and comment-to-DM trigger into a reviewable carousel-spec.md (no images, no credits). Use whenever the user wants to plan, outline, draft, write, or structure an Instagram/IG carousel or swipe post, or turn/repurpose a topic, links, article, GitHub repos, or a video into one — even if they say "make" or "create" a carousel but have no spec yet. Also /instagram-carousel-plan. NOT for rendering images from an already-approved spec (use instagram-carousel-generate for that), and NOT for a website "carousel"/slider UI component, a LinkedIn post, a content calendar, or single-image graphics.
 ---
 
 # Instagram Carousel — Plan
