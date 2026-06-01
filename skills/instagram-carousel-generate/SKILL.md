@@ -1,6 +1,6 @@
 ---
 name: instagram-carousel-generate
-description: Generate Instagram carousel slide images from an approved carousel-spec.md. Use when the user says "generate the carousel", "render the slides", "make the carousel images", or /instagram-carousel-generate. Renders full 3:4 portrait slides via HiggsField GPT Image 2 — the model letters ALL the text itself from a rich full-slide prompt; no Pillow text overlay. To write or edit the copy first, use instagram-carousel-plan.
+description: Generate the slide images for an Instagram carousel from an approved carousel-spec.md — renders full 3:4 portrait slides via HiggsField GPT Image 2, which letters ALL the text into each slide from a rich full-slide prompt (no Pillow text overlay), plus a contact sheet. Use whenever the user wants to generate, render, make, produce, or re-roll the carousel images/slides from an existing spec — including re-rolling just one slide or the cover. Also /instagram-carousel-generate. Requires a spec — if the copy doesn't exist yet or needs writing/editing, use instagram-carousel-plan first. NOT for generating standalone images (a logo, a cat picture, a landing-page hero), exporting a design to PNG, or making a video.
 ---
 
 # Instagram Carousel — Generate
