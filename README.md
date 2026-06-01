@@ -54,48 +54,57 @@ for itself. Pick your host and copy the block — full details in **[INSTALL.md]
 
 ## Step 2 — Make it yours
 
-Two editable files land at your project root on install and are **never overwritten** on re-install:
+Two things land at your project root on install — **never overwritten** on re-install.
 
-1. **Set your style.** Browse Instagram / Pinterest (or any platform) for carousels whose look you
-   want. Download a handful of reference posts and drop them into **`_reference-style/`** — this
-   few-shot deck is what defines the whole generated world (sky, cards, mascot, palette). Swap these
-   images and every future carousel restyles, no code changes.
-2. **Edit `BRAND.md`.** Fill in your handle, accent color, voice, and mascot. Both skills read this
-   — nothing brand-specific is hardcoded.
+**`_reference-style/`** — defines the look
+- Browse Instagram / Pinterest for carousels you like
+- Download a few posts → drop them in this folder
+- Sets the whole world: sky, cards, mascot, palette
+- Swap the images → every future carousel restyles
 
-## Step 3 — Plan a carousel
+**`BRAND.md`** — defines the brand
+- Your `@handle` + accent color
+- Voice + mascot
+- Both skills read it; nothing is hardcoded
 
-Pick a topic and point the skill at whatever you've got — pasted links, GitHub repos, an article, or
-a **file path to your own research notes** (Obsidian vault, a wiki, a folder of clippings). Trigger
-the plan skill:
+## Step 3 — Plan a carousel — `/instagram-carousel-plan`
 
-```
-plan an instagram carousel for the top 5 GitHub repos every dev should clone
-```
-
-It asks ≤4 questions, researches your sources, and writes `carousel-spec.md` — the copy plus a
-skimmable ASCII layout. Edit any field directly in that file; once you're happy, it's locked.
-
-## Step 4 — Generate the slides
-
-Approve the spec, then trigger the generate skill:
+Run the slash command with the sources you have — paste links, or point it at a folder of research
+notes (reference the path in square brackets):
 
 ```
-generate the carousel
+/instagram-carousel-plan from these links: <url1> <url2> <url3>
+```
+```
+/instagram-carousel-plan plan a carousel from my research in [path/to/research-folder]
 ```
 
-It shows a cost estimate first, locks the cover to fix the look, then renders the rest against a
-fixed reference set + pinned seed so every slide shares one world. Output is cropped to 1080×1350
-plus a contact sheet. Single-slide text fixes re-compose for free; only background regens spend.
+It asks ≤4 questions, researches your sources, and writes `carousel-spec.md` (the copy + a skimmable
+ASCII layout). Edit any field directly in that file; once you're happy, it's locked. See a real
+run in [`examples/claude-dynamic-workflows/`](examples/claude-dynamic-workflows) — input → spec → output.
 
-## How it works (under the hood)
+## Step 4 — Generate the slides — `/instagram-carousel-generate`
 
-- **plan** never spends image credits — it only researches and writes copy into the spec.
-- **generate** uses a **hybrid pipeline**: HiggsField GPT Image 2 makes the text-free background
-  (the world + mascot + a blank card); Pillow overlays headlines, bullets, URLs, and the real logo
-  PNGs — so all text and brand marks are pixel-accurate and editable without re-spending credits.
-- Consistency comes from passing the **same reference set + same pinned seed** to every slide, never
-  chaining slide N−1 (which causes drift).
+Approve the spec, then run the slash command — bare to use the latest spec, or with its file path:
+
+```
+/instagram-carousel-generate
+```
+```
+/instagram-carousel-generate instagram-carousel/<slug>/carousel-spec.md
+```
+
+It shows a cost estimate first, locks the cover, then renders the rest at 1080×1350 + a contact
+sheet. Text-only fixes re-compose for free; only background regens spend credits.
+
+## Under the hood
+
+- **Skills:** plan, then generate
+- **Image model:** HiggsField GPT Image 2
+- **Render path:** Claude Code → CLI; Cowork → MCP
+- **Text + logos:** Python Pillow overlay
+- **Dependencies:** Python 3.9+, Pillow
+- **Planning:** zero image credits spent
 
 ## License
 

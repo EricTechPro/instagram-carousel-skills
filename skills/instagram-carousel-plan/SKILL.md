@@ -20,15 +20,18 @@ the user approves *before* any image credits are spent. This skill writes words 
 - Generic social copy unrelated to a carousel → a general copywriting skill
 
 ## The project folder it creates
-Everything for one carousel lives under the **current project root**:
+Everything for one carousel lives under the **current project root** — one folder per topic, each
+with the same three-part shape so every carousel is laid out identically (input → spec → output):
 ```
 instagram-carousel/
-└── <topic-slug>/                 e.g. top-5-github-skills/
-    ├── research/                 # the research "wiki" — one .md per source + sources.md index
-    ├── carousel-spec.md          # the approved spec (slides + caption + hashtags + DM-trigger)
-    └── slides/                   # (written later by instagram-carousel-generate)
+└── <topic-slug>/                 e.g. claude-dynamic-workflows/
+    ├── input/                    # the research "wiki" — one .md per source + sources.md index
+    ├── spec/
+    │   └── carousel-spec.md      # the approved spec (slides + caption + hashtags + DM-trigger)
+    └── output/                   # slides (written later by instagram-carousel-generate)
 ```
-Create `instagram-carousel/<topic-slug>/research/` first; slug the topic (lowercase, hyphens).
+Create `instagram-carousel/<topic-slug>/input/` first; slug the topic (lowercase, hyphens). If the
+user already has a research folder, copy or point its notes into `input/` rather than starting blank.
 
 ## Workflow (research → copy → spec → approve)
 
@@ -50,7 +53,7 @@ first**). Four or fewer:
 Read `references/research-playbook.md`. For each link: web search / firecrawl / WebFetch the facts.
 For repos: `gh` or web for **stars, one-line "what it is", "why it matters"**, and notable UI/visual
 detail worth showing (e.g. "GitHub repo header: black top nav, repo name, star count" — a slide can
-*mimic* that look). Write each source to `research/<source-slug>.md` and an index `research/sources.md`.
+*mimic* that look). Write each source to `input/<source-slug>.md` and an index `input/sources.md`.
 This is the grounding "wiki" the copy is built from — no invented facts.
 
 ### 4. Write the copy
@@ -69,8 +72,10 @@ Read `references/copy-frameworks.md` and `references/sequence-patterns.md`. Appl
 ### 5. Emit the spec
 First read **`BRAND.md`** at the project root for the brand defaults (`handle`, `default_accent`,
 `voice`) — never invent a handle or accent; if it's missing, ask the user once. Then write
-`instagram-carousel/<topic-slug>/carousel-spec.md` using `references/spec-template.md`:
-global meta + **ASCII layout diagram** + one block per slide + the caption/hashtags/DM-trigger block.
+`instagram-carousel/<topic-slug>/spec/carousel-spec.md` using `references/spec-template.md`:
+global meta + **ASCII layout diagram** + one block per slide — **each led by an ASCII wireframe**
+(where badge/headline/subhead/bullets/mascot/logo/handle land) so the user can review the layout
+before rendering — + the caption/hashtags/DM-trigger block.
 
 ### 6. Approve + hand off (spec-driven marketing)
 Show the **ASCII layout** and **2–3 cover-headline options** in chat (skimmable). Tell the user they

@@ -1,9 +1,15 @@
 # carousel-spec.md template
 
-Write this to `instagram-carousel/<topic-slug>/carousel-spec.md`. It is the **contract** the
+Write this to `instagram-carousel/<topic-slug>/spec/carousel-spec.md`. It is the **contract** the
 generate skill renders. The user may edit any field directly before generating.
 
-Use this exact structure (YAML-ish front block + one `## Slide N` block each + a caption block):
+Use this exact structure (YAML-ish front block + one `## Slide N` block each + a caption block).
+
+**Lead every `## Slide N` with a wireframe** — a small ASCII mock showing where each element lands on
+the 1080×1350 canvas (badge → headline → subhead → ≤3 bullets → the Clawd/world → logo · tail ·
+@handle). It lets the user *see* each slide like a layout mock before any image is rendered. The
+renderer ignores it and draws from the `- key: value` fields beneath it — so keep wireframe lines
+starting with `│`, `┌`, `└`, spaces, or `•` (never `#` or `- `, which would confuse the parser):
 
 ````markdown
 ---
@@ -31,6 +37,16 @@ COVER → 01 → 02 → 03 → 04 → 05 → HOW-TO → CTA      (8 slides · "5
 ```
 
 ## Slide 1
+```text
+┌──────────────────────────────── slide 1 · COVER
+│   ‹ ALL FREE ›                              badge pill (omit on a bare cover)
+│   ██ headline — Archivo Black, huge
+│   ▁  subhead — one line
+│   ♛  character_pose (Clawd + generated world)
+│   [logo]                          swipe →   logo · open-loop tail
+│   @handle                                   handle · bottom-left
+└───────────────────────────────────────────────
+```
 - type: cover
 - badge: "ALL FREE"
 - headline: "5 repos every dev should clone"
@@ -108,7 +124,14 @@ dm_trigger: "REPOS"
 - `logo_file` + `accent_hex`: look up the featured tool in
   `../instagram-carousel-generate/references/tool-brand-colors.md`. Fall back to the BRAND.md
   `default_accent` if the tool has none.
-- Respect density caps (headline ≤7 words, ≤3 bullets ≤6 words).
-- Every slide gets a `character_pose` and a `card_style` from the generate skill's vocab.
+- Respect density caps (headline ≤7 words, ≤3 bullets ≤6 words). **Generate renders the whole slide
+  — text included — via GPT Image 2**, so keep each slide to ONE big idea with minimal copy and a
+  punchy headline; it has to stop a scroll.
+- Every slide gets a **vivid `character_pose` — it becomes the actual rendered scene**, so make it
+  specific to that slide's idea. The topic is fanning out many agents, so visualize it: a master
+  orchestrating a crowd of agent-Clawds, finder/refuter pairs, a search fan-out, an agent per
+  document. (`card_style` is just a hint.)
+- `terminal: "<command>"` renders as a **Claude Code CLI window** (dots + Claude logo + the command +
+  an "Opus 4.8" status bar). Use it on workflow/command slides; keep the command short.
 - Leave `mimic_ui: none` unless the research flagged a worth-showing source UI.
 - Run the anti-AI scrub on every text field before saving.

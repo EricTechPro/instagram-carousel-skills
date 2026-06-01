@@ -1,11 +1,12 @@
 # Research Playbook → the research wiki
 
 Goal: ground every slide in real facts. No invented stats, stars, or quotes. Output a small
-markdown "wiki" under `instagram-carousel/<topic-slug>/research/`.
+markdown "wiki" under `instagram-carousel/<topic-slug>/input/` (the per-topic `input/` folder — if
+the user handed you a research folder, this is where its notes go too).
 
 ## Output shape
 ```
-research/
+input/
 ├── sources.md            # index: one row per source — title, url, type, one-line takeaway
 ├── <source-1-slug>.md    # the facts you pulled from source 1
 ├── <source-2-slug>.md

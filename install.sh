@@ -19,10 +19,12 @@ if [[ -n "${1:-}" && "$1" != "--global" ]]; then TARGET="$1"; fi
 
 if [[ "$GLOBAL" == "1" ]]; then
   SKILLS_DIR="$HOME/.claude/skills"
+  COMMANDS_DIR="$HOME/.claude/commands"
   ASSETS_DIR="$HOME/.claude/instagram-carousel"
   ROOT_DIR="$HOME/.claude/instagram-carousel"   # no single project root when --global
 else
   SKILLS_DIR="$TARGET/.claude/skills"
+  COMMANDS_DIR="$TARGET/.claude/commands"
   ASSETS_DIR="$TARGET/.claude/instagram-carousel"
   ROOT_DIR="$TARGET"                            # editable brand + style sit at the project root
 fi
@@ -31,7 +33,7 @@ echo "Installing Instagram Carousel skills"
 echo "  from: $SRC_DIR"
 echo "  into: $SKILLS_DIR"
 
-mkdir -p "$SKILLS_DIR" "$ASSETS_DIR"
+mkdir -p "$SKILLS_DIR" "$COMMANDS_DIR" "$ASSETS_DIR"
 
 ok=1
 for skill in instagram-carousel-plan instagram-carousel-generate; do
@@ -41,6 +43,17 @@ for skill in instagram-carousel-plan instagram-carousel-generate; do
     echo "  ✓ $skill"
   else
     echo "  ✗ $skill (SKILL.md missing)"; ok=0
+  fi
+done
+
+# Slash commands: /instagram-carousel-plan and /instagram-carousel-generate.
+# These make the commands real (typed), not just phrases the skill happens to match.
+for cmd in instagram-carousel-plan instagram-carousel-generate; do
+  if [[ -f "$SRC_DIR/commands/$cmd.md" ]]; then
+    cp "$SRC_DIR/commands/$cmd.md" "$COMMANDS_DIR/$cmd.md"
+    echo "  ✓ /$cmd"
+  else
+    echo "  ✗ /$cmd (commands/$cmd.md missing)"; ok=0
   fi
 done
 
@@ -69,9 +82,9 @@ fi
 
 cat <<EOF
 
-Done. Two skills installed:
-  • instagram-carousel-plan      — research + copywriting -> carousel-spec.md
-  • instagram-carousel-generate  — spec -> 1080x1350 slides (HiggsField GPT Image 2)
+Done. Two skills + two slash commands installed:
+  • /instagram-carousel-plan      — research + copywriting -> carousel-spec.md
+  • /instagram-carousel-generate  — spec -> 1080x1350 slides (HiggsField GPT Image 2)
 
 Make it yours (optional):
   • $ROOT_DIR/BRAND.md           — handle, accent, voice, mascot
@@ -80,7 +93,7 @@ Make it yours (optional):
 Assets auto-resolve from the install above. Only set this if you move them elsewhere:
   export IG_CAROUSEL_ASSETS="$ASSETS_DIR"
 
-Then in Claude Code: "plan an instagram carousel for <topic>".
+Then in Claude Code: /instagram-carousel-plan top 5 GitHub repos for Claude skills
 See README.md for HiggsField (CLI or MCP) setup.
 EOF
 [[ "$ok" == "1" ]] || { echo "Some skills failed to install."; exit 1; }
