@@ -1,37 +1,50 @@
-# Install instructions (for the agent)
+# Install
 
-You are installing the **instagram-carousel** skills into the user's current project. Do this:
+You don't clone anything or run a plugin command yourself. **Hand the repo URL to your coding
+agent and let it install.** Pick the agent you use below, copy the block, and paste it in — the
+agent clones the repo, copies both skills into your project, and wires up the assets.
 
-1. **Clone the repo** into a temporary location (or use it if already cloned):
-   ```bash
-   git clone https://github.com/EricTechPro/instagram-carousel-skills /tmp/instagram-carousel-skills
-   ```
+The only difference between the two is how slides get *rendered*:
 
-2. **Run the installer** targeting the user's current project (default) or globally:
-   ```bash
-   bash /tmp/instagram-carousel-skills/install.sh "$PWD"      # this project
-   # or: bash /tmp/instagram-carousel-skills/install.sh --global   # all projects (~/.claude)
-   ```
-   This copies both skills into `.claude/skills/` and the shared assets (fonts, style
-   references, logos) into `.claude/instagram-carousel/`.
+| Agent | Renders with |
+|---|---|
+| **Claude Code** | HiggsField **CLI** + GPT Image 2 |
+| **Claude Cowork** | HiggsField **MCP** |
 
-3. **(Optional) Pin the assets path.** The generate skill auto-resolves
-   `.claude/instagram-carousel/`, so this is only needed if the user keeps assets elsewhere:
-   ```bash
-   export IG_CAROUSEL_ASSETS="$PWD/.claude/instagram-carousel"   # or ~/.claude/instagram-carousel if --global
-   ```
+Pick one. Either way you get the full toolkit (both skills + assets + your editable `BRAND.md` and
+`_reference-style/`).
 
-4. **Install Python deps** (used to crop/compose slides):
-   ```bash
-   pip install -r /tmp/instagram-carousel-skills/requirements.txt   # Pillow
-   ```
+---
 
-5. **Tell the user about HiggsField** (only needed to *generate* images, not to *plan*):
-   - CLI: `npm install -g @higgsfield/cli && higgsfield auth login` (verify: `higgsfield account status`), **or**
-   - MCP: connect the HiggsField MCP in the host (Clockwork/cowork).
+## Claude Code
 
-6. **Confirm** both skills are discoverable, then tell the user:
-   > "Installed. Say *plan an instagram carousel for &lt;topic&gt;* to start."
+Renders slides with the **HiggsField CLI** (GPT Image 2). Paste this into Claude Code:
 
-Do not require Superpowers or any other repo. If `install.sh` reports a missing skill or asset,
-stop and show the user the exact line.
+```
+Install the Instagram Carousel skills into this project.
+Repo: https://github.com/EricTechPro/instagram-carousel-skills
+Read the repo's docs/install.md and follow it for the Claude Code (HiggsField CLI) path.
+```
+
+## Claude Cowork
+
+Renders slides with the **HiggsField MCP**. Paste this into Cowork:
+
+```
+Install the Instagram Carousel skills into this workspace.
+Repo: https://github.com/EricTechPro/instagram-carousel-skills
+Read the repo's docs/install.md and follow it for the Claude Cowork (HiggsField MCP) path.
+```
+
+---
+
+## After it installs
+
+The agent drops two skills into `.claude/skills/`, shared assets into
+`.claude/instagram-carousel/`, and two editable files — **`BRAND.md`** and **`_reference-style/`**
+— at your project root. Re-running the installer never overwrites those two.
+
+**HiggsField auth is a separate step** — you only need it to *generate* images, not to *plan*. The
+generate skill checks it before spending any credits and walks you through it. Full setup (CLI
+login, MCP connection, cost gating, failure modes) lives in
+[`skills/instagram-carousel-generate/references/higgsfield-setup.md`](skills/instagram-carousel-generate/references/higgsfield-setup.md).

@@ -1,121 +1,101 @@
 # Instagram Carousel Skills
 
-Turn a topic + a few sources into a finished, on-brand Instagram carousel — without leaving
-your coding agent. Two skills that compose: **plan** writes the copy, **generate** renders the
-slides.
+Turn any Instagram post or pile of sources into a finished, on-brand Instagram carousel — without
+leaving your agent. Use it right inside **Claude Code** or **Claude Cowork**: two skills combine,
+one to **write the plan** and one to **generate** the slides.
 
 ```text
-"plan an instagram carousel for the top 5 GitHub repos every dev should clone"
-        │
-        ▼   instagram-carousel-plan   (asks ≤4 questions, researches, writes copy)
-   carousel-spec.md  +  an ASCII layout you can skim
-        │
-        ▼   instagram-carousel-generate   (HiggsField GPT Image 2)
-   slide-01.png … slide-08.png   (1080×1350, one consistent world)
+  ── 1 · PLAN ─ writes the copy ──                          ── 2 · GENERATE ─ renders the slides ──
+
+  a folder of IG posts,        ┌──────────┐                 ┌──────────┐
+  links, research files,  ───▶ │   plan   │ ───▶  spec  ───▶ │ generate │ ───▶  slide-01.png … slide-08.png
+  or just a topic              │  skill   │      (.md)        │  skill   │       1080×1350, one consistent world
+  "plan a carousel for X"      └──────────┘   you approve     └──────────┘       "generate the carousel"
+                                              & can edit it
 ```
 
-You do **not** need Superpowers or any sibling project.
+The **plan** skill researches your topic/sources and writes the per-slide copy, caption, hashtags,
+and DM-trigger into a reviewable `carousel-spec.md`. You approve it (cheap — no images yet). The
+**generate** skill renders that spec into 1080×1350 slides via HiggsField, one consistent set.
 
-## Install
+## Prerequisites
 
-Pick one. All three drop the two skills into `.claude/skills/`, the shared assets (fonts, logos)
-into `.claude/instagram-carousel/` (auto-resolved), and two editable files at your project root:
-`BRAND.md` and `_reference-style/` (see [Make it yours](#make-it-yours)).
+| Need | Why |
+|---|---|
+| **Claude Code** *or* **Claude Cowork** | the host that runs the two skills |
+| **Python 3.9+** with `pip` | crops + composes slides (Pillow) and builds the contact sheet |
+| **HiggsField** — CLI *or* MCP | renders backgrounds — only needed to **generate**, not to **plan** |
+| *(optional)* `gh` / a web-search tool | source research during planning |
 
-**A — Ask your agent (easiest).** In any project, tell Claude (or any coding agent):
+`pip install -r requirements.txt` (Pillow) is run for you by the installer. HiggsField auth is a
+separate step the generate skill walks you through before any credits are spent — see
+[`higgsfield-setup.md`](skills/instagram-carousel-generate/references/higgsfield-setup.md).
 
-> *"Install the skills from https://github.com/EricTechPro/instagram-carousel-skills"*
+## Step 1 — Install
 
-It clones the repo and runs the installer. (It follows [INSTALL.md](INSTALL.md).)
+You don't clone anything or run a plugin command. Hand the repo URL to your agent and it installs
+for itself. Pick your host and copy the block — full details in **[INSTALL.md](INSTALL.md)**.
 
-**B — Plugin (Claude Code, Clockwork, cowork).**
+- **Claude Code** (renders with the HiggsField **CLI** + GPT Image 2):
 
-```bash
-/plugin marketplace add EricTechPro/instagram-carousel-skills
-/plugin install instagram-carousel@instagram-carousel-skills
+  ```
+  Install the Instagram Carousel skills into this project.
+  Repo: https://github.com/EricTechPro/instagram-carousel-skills
+  Read the repo's docs/install.md and follow it for the Claude Code (HiggsField CLI) path.
+  ```
+
+- **Claude Cowork** (renders with the HiggsField **MCP**):
+
+  ```
+  Install the Instagram Carousel skills into this workspace.
+  Repo: https://github.com/EricTechPro/instagram-carousel-skills
+  Read the repo's docs/install.md and follow it for the Claude Cowork (HiggsField MCP) path.
+  ```
+
+## Step 2 — Make it yours
+
+Two editable files land at your project root on install and are **never overwritten** on re-install:
+
+1. **Set your style.** Browse Instagram / Pinterest (or any platform) for carousels whose look you
+   want. Download a handful of reference posts and drop them into **`_reference-style/`** — this
+   few-shot deck is what defines the whole generated world (sky, cards, mascot, palette). Swap these
+   images and every future carousel restyles, no code changes.
+2. **Edit `BRAND.md`.** Fill in your handle, accent color, voice, and mascot. Both skills read this
+   — nothing brand-specific is hardcoded.
+
+## Step 3 — Plan a carousel
+
+Pick a topic and point the skill at whatever you've got — pasted links, GitHub repos, an article, or
+a **file path to your own research notes** (Obsidian vault, a wiki, a folder of clippings). Trigger
+the plan skill:
+
+```
+plan an instagram carousel for the top 5 GitHub repos every dev should clone
 ```
 
-**C — Clone + script, or release zip.**
+It asks ≤4 questions, researches your sources, and writes `carousel-spec.md` — the copy plus a
+skimmable ASCII layout. Edit any field directly in that file; once you're happy, it's locked.
 
-```bash
-git clone https://github.com/EricTechPro/instagram-carousel-skills
-cd instagram-carousel-skills
-./install.sh /path/to/your/project     # or: ./install.sh --global  (~/.claude)
+## Step 4 — Generate the slides
+
+Approve the spec, then trigger the generate skill:
+
+```
+generate the carousel
 ```
 
-Prefer no clone? Download the latest [release zip](../../releases/latest) and
-`unzip instagram-carousel-skills-v*.zip -d your-project/.claude/`.
+It shows a cost estimate first, locks the cover to fix the look, then renders the rest against a
+fixed reference set + pinned seed so every slide shares one world. Output is cropped to 1080×1350
+plus a contact sheet. Single-slide text fixes re-compose for free; only background regens spend.
 
-Then install Python + Pillow (used to crop/compose slides and build the contact sheet):
+## How it works (under the hood)
 
-```bash
-pip install -r requirements.txt    # or: pip install Pillow
-```
-
-That's it for planning. To **generate** images you also need HiggsField (below).
-
-> Assets resolve automatically (`.claude/instagram-carousel/`). Only set
-> `IG_CAROUSEL_ASSETS` if you keep the assets somewhere non-standard.
-
-## Make it yours
-
-Everything brand-specific lives in two files at your project root — no code edits, and a
-re-install never overwrites them:
-
-- **`BRAND.md`** — your `@handle`, default accent, voice, and mascot. Ships set to Eric Tech;
-  change these and both skills follow.
-- **`_reference-style/`** — the few-shot image deck that defines the whole look (sky/grass/cards).
-  Swap these images to restyle every future carousel.
-
-(Zip-install users: both land in `.claude/` instead of the project root — still editable.)
-
-## HiggsField setup (only needed to generate)
-
-The generate skill renders backgrounds with HiggsField GPT Image 2. Use **either**:
-
-- **CLI:** `npm install -g @higgsfield/cli` then `higgsfield auth login`
-  (verify with `higgsfield account status`).
-- **MCP (Clockwork/cowork):** connect the **HiggsField MCP** in your host's connector settings.
-
-The skill auto-detects which is available and checks it **before** spending any credits.
-Full notes: [`references/higgsfield-setup.md`](skills/instagram-carousel-generate/references/higgsfield-setup.md).
-
-## How it works (60 seconds)
-
-1. **Plan** asks at most four questions (audience+pain, payoff+proof, sequence, CTA goal),
-   researches any links/repos you give it, and writes save-worthy copy using embedded carousel
-   copywriting frameworks. It emits `carousel-spec.md` and shows you a skimmable ASCII layout.
-2. You approve the copy (cheap — no images yet) and can edit any field directly in the spec.
-3. **Generate** renders the cover first so you can lock the look, then renders the rest of the
-   deck against a fixed reference set + pinned seed so every slide shares one world, character,
-   and type. Output is cropped to exactly 1080×1350, plus a contact sheet.
-
-## The two skills
-
-| Skill | Does | Trigger |
-|---|---|---|
-| `instagram-carousel-plan` | Research + copywriting → `carousel-spec.md` + ASCII layout | "plan an instagram carousel for …" |
-| `instagram-carousel-generate` | Spec → fully-rendered 1080×1350 slides | "generate the carousel" |
-
-## What this is NOT
-
-- Not an auto-poster/scheduler — you publish to Instagram yourself.
-- Not a Reels/video tool — static carousels only.
-- Not a general image generator — it is opinionated to one branded visual system (editable in
-  `skills/instagram-carousel-generate/references/visual-system.md`).
-
-## Requirements
-
-- A Claude Code host (CLI, app, Clockwork, cowork…).
-- Python 3 + Pillow (`pip install -r requirements.txt`).
-- HiggsField (CLI or MCP) — only to *generate*, not to *plan*.
-- Optional: `gh` and/or a web-search tool for source research in the plan step.
-
-## Credits
-
-Copywriting frameworks distilled (and attributed in `copy-frameworks.md`) from
-`marcolang/marketing-skills@instagram-carousel` and the marketing skill set. Skill-system
-patterns inspired by [Superpowers](https://github.com/obra/superpowers).
+- **plan** never spends image credits — it only researches and writes copy into the spec.
+- **generate** uses a **hybrid pipeline**: HiggsField GPT Image 2 makes the text-free background
+  (the world + mascot + a blank card); Pillow overlays headlines, bullets, URLs, and the real logo
+  PNGs — so all text and brand marks are pixel-accurate and editable without re-spending credits.
+- Consistency comes from passing the **same reference set + same pinned seed** to every slide, never
+  chaining slide N−1 (which causes drift).
 
 ## License
 
