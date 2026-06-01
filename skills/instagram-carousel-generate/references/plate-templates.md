@@ -32,7 +32,7 @@ Pass them as repeated `--image` flags. **Pin one seed** for the whole deck
 When a slide has `mimic_ui` (e.g. `github-repo-header`), the plate still generates only the
 world + a **larger blank card/panel**. The UI mock (e.g. a dark top nav bar, repo name row, star
 pill) is drawn by `compose_slide.py` as a flat vector-style panel inside the card — not generated.
-This guarantees the UI is legible and correct. See `slide-templates.md` for the panel recipes.
+This guarantees the UI is legible and correct. See `layout-templates.md` for the panel recipes.
 
 ## Rules
 - Keep the full prompt **under ~200 tokens** — the model distorts long prompts.

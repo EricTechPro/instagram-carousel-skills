@@ -52,7 +52,7 @@ cleaner plate; **write each `slide-NN.png` as it completes and skip already-rend
 Run `scripts/compose_slide.py` per slide: crop the background to 1080×1350, then draw the badge,
 headline, subhead, bullets, URL, handle, and "swipe/save" chrome with the bundled fonts at the exact
 sizes/tracking/accent from `references/layout-templates.md`, and **paste the real logo PNG**. If the
-slide has `mimic_ui`, render that panel (e.g. a GitHub repo header) per `references/slide-templates.md`.
+slide has `mimic_ui`, render that panel (e.g. a GitHub repo header) per `references/layout-templates.md`.
 All text/logo accuracy lives here — never in the model.
 
 ### 6. Verify (gates "done")

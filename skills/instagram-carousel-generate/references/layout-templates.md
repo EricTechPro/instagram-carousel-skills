@@ -4,6 +4,18 @@
 origin top-left. All text stays ≥80px from edges and out of the bottom 420px (except chrome).
 Fonts from `assets/fonts/`. Colors from `visual-system.md`; `ACCENT` = the slide's `accent_hex`.
 
+## Slide types
+| type | what the composer draws |
+|---|---|
+| `cover` | big Archivo headline (key word in accent), subhead, badge, `swipe →`, handle |
+| `item` | "0k/N" label, headline, "which means" subhead, ≤3 accent bullets, URL, logo, open-loop tail |
+| `howto` | three step blocks (METHOD 0k / title / one-line desc) |
+| `cta` | eyebrow, big headline with the comment word in accent, subhead, `save this post` |
+
+All four are fully implemented in `compose_slide.py`. The `mimic_ui` panels below are
+**agent-assisted** in v0.1 (drawn with the same Pillow primitives); a built-in `--mimic` mode is
+planned for v0.2. If a slide sets `mimic_ui: none`, only the standard type is rendered.
+
 ## Shared chrome (all slides)
 - **Handle** `@…`: x=72, y=1250, JetBrains Mono 26px, color `#475569`.
 - **Badge** (pill): top-center, y≈70. Cream fill `#F4EEE2`, 1px border `#E2E8F0`, JetBrains Mono

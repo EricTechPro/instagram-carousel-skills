@@ -30,7 +30,7 @@ All use: **numbered payload promised on the cover**, **open-loop tails** between
 When the research notes a source's distinctive look (a GitHub repo header, a dashboard, a code
 editor), an item slide may render that as a **panel inside the cream card** instead of bullets.
 Set `mimic_ui` on that slide (e.g. `mimic_ui: github-repo-header`) and keep a one-line caption.
-`instagram-carousel-generate` turns that hint into the panel — see its `slide-templates.md`.
+`instagram-carousel-generate` turns that hint into the panel — see its `layout-templates.md`.
 
 ## Slide-count guardrail
 Instagram allows up to 20, but 6–10 is the sweet spot. If the topic has more items than that,

@@ -9,9 +9,9 @@ MCP tools itself and calls compose_slide.compose() directly; this file's parser 
 contact-sheet helpers are still reused.
 
 Usage:
-    python generate_carousel.py SPEC.md                 # full run (prompts for cost confirmation)
-    python generate_carousel.py SPEC.md --dry-run       # compose over blank plates, no credits
-    python generate_carousel.py SPEC.md --only 3        # (re)render just slide 3
+    python generate_carousel.py carousel-spec.md                 # full run (prompts for cost confirmation)
+    python generate_carousel.py carousel-spec.md --dry-run       # compose over blank plates, no credits
+    python generate_carousel.py carousel-spec.md --only 3        # (re)render just slide 3
 """
 from __future__ import annotations
 
