@@ -15,6 +15,16 @@ A standalone, public skill repo. Two skills: `instagram-carousel-plan` and
 - `marketplace.json` at repo root (`source: "./"`); `.claude-plugin/plugin.json` is the plugin.
 - `VERSION` is the single source of truth; keep `plugin.json` + `marketplace.json` in sync.
 
+## Cutting a release (super-board style)
+One command does the version bump + tag + zip + GitHub release:
+1. Add a `## v<version> — <date>` section to `RELEASE-NOTES.md` describing the changes.
+2. Run `./scripts/release.sh <version>` (e.g. `0.2.0`). Use `--dry-run` first to preview.
+
+It validates semver + a clean tree, syncs `VERSION` + `skills/*/VERSION` + `plugin.json` +
+`marketplace.json`, builds the `.claude/`-shaped release zip (no `__pycache__`/`.DS_Store`),
+commits `release: vX.Y.Z`, tags, pushes, and creates the GitHub release using that version's
+RELEASE-NOTES section as the body. Refuses to overwrite an existing tag/release.
+
 ## When editing skills
 - Keep the plan/generate split sharp: planning never spends image credits; generation never rewrites copy.
 - Generation must gate on a cost estimate and a prereq (HiggsField CLI or MCP) check before any spend.
