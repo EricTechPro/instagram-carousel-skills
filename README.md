@@ -14,6 +14,19 @@ slides.
    slide-01.png … slide-08.png   (1080×1350, one consistent world)
 ```
 
+## Easiest install — just ask your agent
+
+In any project, tell Claude (or any coding agent):
+
+> **"Install the skills from https://github.com/EricTechPro/instagram-carousel-skills"**
+
+It will clone the repo and run the installer for you. If your agent prefers explicit steps, point
+it at the install guide:
+
+> **"Fetch and follow https://raw.githubusercontent.com/EricTechPro/instagram-carousel-skills/main/INSTALL.md"**
+
+That's the whole install. (Manual steps below if you'd rather do it yourself.)
+
 ## From zero (clean machine, nothing pre-installed)
 
 If you're starting in a fresh project that has **no Superpowers and no HiggsField**, this is the
