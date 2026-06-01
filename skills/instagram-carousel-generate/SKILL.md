@@ -24,7 +24,14 @@ letters text well, so we let it; quoting each string in the prompt keeps spellin
 - No spec yet, or the copy needs work → `instagram-carousel-plan`
 
 ## The style contract (match the reference deck — NOT "Minecraft")
-The look is defined by `_reference-style/` (project root, swappable per `BRAND.md`). Hold to it:
+**Brand-portable:** the *specific* look below (voxel world, Clawd, orange) is just the **default brand**.
+`build_slide_prompt` reads `style` / `mascot` / `surface` / `accent_default` / `handle` from the spec
+**meta** (filled by the plan skill from the active profile — `BRAND.md`, or `BRAND.<name>.md`), with
+the Claude look only as a fallback. To render a different brand (e.g. the Hermes manga profile): set
+those meta fields, set `accent_default: monochrome` for B&W, and point `IG_CAROUSEL_STYLE` at a
+per-brand reference folder (even just that brand's logo). See `examples/hermes-agent-use-cases/`.
+
+The default look is defined by `_reference-style/` (project root, swappable per `BRAND.md`). Hold to it:
 - **Reference style, not a busy game world.** Polished, soft-lit, premium 3D children's-book render.
   A small, **cute, rounded** mascot (Clawd) — never a cluttered blocky Minecraft scene. Lots of open sky.
 - **One big idea per slide, minimal text.** A **huge elegant serif headline is the hero**; one short

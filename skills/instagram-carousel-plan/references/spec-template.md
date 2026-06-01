@@ -18,9 +18,15 @@ slug: top-5-github-repos
 sequence: listicle
 slide_count: 8
 cta_goal: reach            # save-bait | reach | traffic
-handle: "@erictech"                   # default from BRAND.md — don't invent one
-style_ref: _reference-style           # project-root deck; swap images to change the look
-accent_default: "#2BAADF"
+# --- brand block: filled from the active BRAND profile (BRAND.md, or BRAND.<name>.md). Generate
+#     reads these from meta, so NOTHING brand-specific is hardcoded. Omit mascot/style/surface to
+#     fall back to the default (Eric Tech / Clawd voxel) look.
+handle: "@erictech"                   # from the brand profile — don't invent one
+accent_default: "#2BAADF"             # a hex, OR "monochrome" for pure black & white (emphasis = italic, no color)
+mascot: "Clawd — a cute rounded orange voxel mascot with tiny sunglasses"   # the recurring host
+style: "polished 3D voxel children's-book render, sunny blue sky + green grass"   # the whole aesthetic
+surface: "a cream paper note pinned to a wooden signboard"   # where item text sits
+style_ref: _reference-style           # few-shot reference deck (set IG_CAROUSEL_STYLE for a per-brand deck)
 audience: "junior devs drowning in boilerplate"
 payoff: "clone 5 repos, ship faster this week"
 ---
