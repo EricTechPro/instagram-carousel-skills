@@ -34,6 +34,8 @@ If a bullet can't be made specific (a noun/number/concrete verb), **cut it** —
 - Headline ≤ 7 words · subhead ≤ 12 words · ≤ 3 bullets, each ≤ 6 words.
 - **One idea per slide.** If body wraps past 2 lines, trim — don't shrink the font.
 - Each item slide must stand alone as a screenshot-able save.
+- *Exception:* `howto` "Method 0k — …" lines may run longer; the composer splits them into a
+  label + title + one-liner, so they aren't held to the ≤6-word bullet cap.
 
 ## 4. Retention mechanics (the swipe-through signal is the algorithm)
 - **Number the payload and promise it on the cover** ("5 repos") + badge each item "01/5 … 05/5".

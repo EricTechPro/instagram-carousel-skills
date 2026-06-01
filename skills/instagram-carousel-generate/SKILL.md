@@ -53,7 +53,8 @@ Run `scripts/compose_slide.py` per slide: crop the background to 1080×1350, the
 headline, subhead, bullets, URL, handle, and "swipe/save" chrome with the bundled fonts at the exact
 sizes/tracking/accent from `references/layout-templates.md`, and **paste the real logo PNG**. If the
 slide has `mimic_ui`, render that panel (e.g. a GitHub repo header) per `references/layout-templates.md`.
-All text/logo accuracy lives here — never in the model.
+All text/logo accuracy lives here — never in the model. (`mimic_ui` panels are agent-assisted in
+v0.1 — drawn with the same Pillow primitives per `layout-templates.md`, not a built-in mode yet.)
 
 ### 6. Verify (gates "done")
 - Each file: PNG, non-zero, **exactly 1080×1350**.
