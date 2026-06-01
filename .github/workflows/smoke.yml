@@ -17,6 +17,8 @@ jobs:
           bash ./install.sh "$TMP"
           test -f "$TMP/.claude/skills/instagram-carousel-plan/SKILL.md"
           test -f "$TMP/.claude/skills/instagram-carousel-generate/SKILL.md"
+          test -f "$TMP/.claude/commands/instagram-carousel-plan.md"      # /instagram-carousel-plan
+          test -f "$TMP/.claude/commands/instagram-carousel-generate.md"  # /instagram-carousel-generate
           test -f "$TMP/.claude/instagram-carousel/character-references/github-logo.png"
           test -f "$TMP/BRAND.md"                              # editable brand config at project root
           test -f "$TMP/_reference-style/ref-00-cover.jpg"     # swappable style deck at project root
@@ -34,13 +36,13 @@ jobs:
         run: |
           python3 -m pip install --quiet Pillow
           python3 skills/instagram-carousel-generate/scripts/generate_carousel.py \
-            examples/top-5-github-repos/carousel-spec.md --dry-run
+            examples/claude-dynamic-workflows/spec/carousel-spec.md --dry-run
           for n in 01 02 03 04 05 06 07 08; do
-            test -f examples/top-5-github-repos/slides/slide-$n.png
+            test -f examples/claude-dynamic-workflows/output/slide-$n.png   # spec/ → sibling output/
           done
           python3 - <<'PY'
           from PIL import Image
-          im = Image.open("examples/top-5-github-repos/slides/slide-01.png")
+          im = Image.open("examples/claude-dynamic-workflows/output/slide-01.png")
           assert im.size == (1080, 1350), im.size
           print("✓ 8 slides rendered at 1080x1350")
           PY

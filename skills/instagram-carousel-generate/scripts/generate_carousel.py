@@ -38,8 +38,17 @@ def _coerce(v: str):
             return json.loads(v)
         except json.JSONDecodeError:
             return v.strip("[]")
-    if (v.startswith('"') and v.endswith('"')) or (v.startswith("'") and v.endswith("'")):
-        return v[1:-1]
+    # Quoted value: return the inner string up to the closing quote, ignoring any trailing
+    # inline comment (e.g. `handle: "@erictech"   # default from BRAND.md`).
+    if v[:1] in ('"', "'"):
+        q = v[0]
+        end = v.find(q, 1)
+        return v[1:end] if end != -1 else v[1:]
+    # Unquoted value: drop a trailing inline comment that follows whitespace ("  # …"),
+    # but keep leading-# values like hex colors (`#2BAADF`).
+    m = re.search(r"\s#", v)
+    if m:
+        v = v[:m.start()].strip()
     return v
 
 
@@ -123,6 +132,68 @@ PLATE_BY_TYPE = {
 def build_plate_prompt(slide: dict) -> str:
     """Per-type background plate prompt (no text/logos) — see plate-templates.md."""
     return PLATE_PREAMBLE + " " + PLATE_BY_TYPE.get(slide.get("type", "item"), PLATE_BY_TYPE["item"])
+
+
+# ---- full-slide prompt (GPT Image 2 renders the text too) -------------------
+STYLE = (
+    "Polished, soft-lit premium 3D illustration in a friendly children's-book style — match the "
+    "reference images closely. Sunny scene: bright blue sky, soft white clouds, a green grass strip. "
+    "A small, CUTE, rounded orange voxel mascot named Clawd with tiny dark sunglasses — smooth and "
+    "simple, NOT a cluttered blocky Minecraft world. Keep the composition clean and uncluttered with "
+    "lots of open sky and breathing room. Tall portrait 4:5 composition. Warm orange accent."
+)
+
+
+def _q(s: str) -> str:
+    """Quote-safe text for the prompt: collapse whitespace, neutralize double quotes."""
+    return " ".join(str(s).split()).replace('"', "'").strip()
+
+
+def build_slide_prompt(slide: dict, meta: dict) -> str:
+    """A complete-slide prompt in the reference style: ONE big elegant serif headline is the hero,
+    minimal supporting text, a small cute mascot, wooden-sign/cream-note framing. GPT Image 2
+    renders the world, the mascot AND the text. Every string is quoted so it letters exactly."""
+    accent = (slide.get("accent_hex") or meta.get("accent_default") or "#D97757")
+    handle = _q(slide.get("handle") or meta.get("handle") or "")
+    stype = slide.get("type", "item")
+    headline, subhead = _q(slide.get("headline", "")), _q(slide.get("subhead", ""))
+    badge = _q(slide.get("badge", "") or "")
+    bullets = [_q(b) for b in (slide.get("bullets") or []) if b][:3]
+    terminal = _q(slide.get("terminal", "") or "")
+    pose = _q(slide.get("character_pose", "") or "the cute orange mascot Clawd")
+
+    p = [STYLE]
+    # The headline is the hero — big, elegant serif, scroll-stopping. Keep everything else minimal.
+    p.append(f'HERO HEADLINE — the focus of the slide, VERY LARGE bold elegant serif in dark '
+             f'charcoal, easy to read while scrolling: "{headline}". Set the most important word in '
+             f'italic serif in the accent color {accent}.')
+    if subhead:
+        p.append(f'One short supporting line, smaller, beneath it: "{subhead}".')
+
+    if stype == "cover":
+        if badge and badge.lower() != "none":
+            p.append(f'A small rounded pill badge reading "{badge}".')
+        p.append(f"The headline spans the upper half over open sky. Below it, large and central, "
+                 f"the scene: {pose}. Bottom-right, a small italic label: \"swipe →\".")
+    else:
+        p.append("The text sits on a cream paper note pinned to a wooden signboard on a post, "
+                 "centered with generous margins, like the reference — minimal wording, big headline.")
+        if badge and badge.lower() != "none":
+            p.append(f'A small tracked uppercase label at the top of the note: "{badge}".')
+        if bullets:
+            items = "; ".join(f'"{b}"' for b in bullets)
+            p.append(f"A short list, each line led by a small {accent} square bullet: {items}.")
+        if terminal:
+            p.append('A compact terminal panel on the note, styled like the Claude Code CLI: dark '
+                     'rounded window, three small red/yellow/green dots and a tiny orange Claude '
+                     f'sunburst logo in the title bar, white monospace text "> {terminal}", and a '
+                     'thin bottom status bar reading "Opus 4.8".')
+        p.append(f"At the base of the post, small and cute: {pose}.")
+    if handle:
+        p.append(f'At the very bottom-left, small WHITE text with a soft drop shadow: "{handle}".')
+    p.append("Minimal text overall, big readable type, clean and uncluttered, no watermark, and no "
+             "extra arrows or captions along the bottom edge.")
+    return " ".join(p)
 
 
 def _find_upward(start: Path, name: str, max_up: int = 4) -> Path | None:
@@ -210,8 +281,10 @@ def verify(png: Path) -> list[str]:
     if not png.exists() or png.stat().st_size == 0:
         return [f"{png.name}: missing/empty"]
     im = Image.open(png)
-    if im.size != (W, H):
-        issues.append(f"{png.name}: {im.size} != {(W, H)}")
+    w, h = im.size
+    # Real slides are the full plate (1080-wide portrait); dry-run previews are 1080x1350.
+    if w != 1080 or not (1080 <= h <= 1600):
+        issues.append(f"{png.name}: {im.size} is not a 1080-wide portrait")
     return issues
 
 
@@ -259,8 +332,12 @@ def main(argv=None):
     spec_path = Path(args.spec)
     parsed = parse_spec(spec_path)
     slides, meta = parsed["slides"], parsed["meta"]
-    out_dir = spec_path.parent / "slides"
-    out_dir.mkdir(exist_ok=True)
+    # Per-topic layout is input/ → spec/carousel-spec.md → output/. When the spec sits in a `spec/`
+    # subfolder, slides go to the sibling `output/`; for a flat spec they land beside it in `output/`.
+    spec_dir = spec_path.parent
+    topic_root = spec_dir.parent if spec_dir.name == "spec" else spec_dir
+    out_dir = topic_root / "output"
+    out_dir.mkdir(parents=True, exist_ok=True)
     assets = cs.resolve_assets()
 
     problems = check_prereqs(args.dry_run)
@@ -290,16 +367,27 @@ def main(argv=None):
             rendered.append(out_png)
             continue
 
-        bg = ""
-        if not args.dry_run:
-            data = hf_generate(build_plate_prompt(slide), ref_paths)
+        slide.setdefault("handle", meta.get("handle", ""))
+        if args.dry_run:
+            # Free structural preview (and CI): Pillow draws a placeholder of the layout.
+            cs.compose(slide, "", str(out_png), assets)
+        else:
+            # GPT Image 2 renders the WHOLE slide — world, mascot AND all the text — from a
+            # full-slide prompt. Pillow only crops the result to 1080x1350.
+            data = hf_generate(build_slide_prompt(slide, meta), ref_paths)
             if str(data.get("status", "")).lower() not in ("success", "completed", "done"):
                 print(f"  ✗ slide {i:02d} generation status={data.get('status')}; skipping")
                 continue
-            bg = hf_fetch_plate(data, out_png)
-
-        slide.setdefault("handle", meta.get("handle", ""))
-        cs.compose(slide, bg, str(out_png), assets)
+            plate = hf_fetch_plate(data, out_png)
+            if plate and Path(plate).exists():
+                # Go with the FULL plate — resize to 1080 wide, keep its native 3:4 height so
+                # nothing GPT composed (headline top / handle bottom) gets cropped away.
+                src = cs.Image.open(plate).convert("RGB")
+                pw, ph = src.size
+                img = src.resize((1080, round(1080 * ph / pw)), cs.Image.LANCZOS)
+            else:
+                img = cs.Image.new("RGB", (1080, 1440), "#FFFFFF")
+            img.save(str(out_png), "PNG")
         issues = verify(out_png)
         print(("  ✓ " if not issues else "  ! ") + f"slide {i:02d} " + (" ".join(issues)))
         rendered.append(out_png)

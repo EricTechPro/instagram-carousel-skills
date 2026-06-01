@@ -259,6 +259,31 @@ def text_frame(img: Image.Image):
     return (MARGIN, 180, W - MARGIN, BOTTOM_SAFE), False
 
 
+def draw_terminal(draw, assets, command, x, y, w, accent):
+    """Draw a dark terminal/code-block card: traffic-light dots + a mono command line.
+    The `> ` prompt is drawn in the slide accent; returns the card's bottom y."""
+    pad, top, line_h = 22, 46, 34
+    cf = font(assets, "mono", 24)
+    full = "> " + str(command).lstrip("> ").strip()
+    lines = wrap(draw, full, cf, w - pad * 2)
+    bottom = y + top + len(lines) * line_h + pad - 6
+    draw.rounded_rectangle([x, y, x + w, bottom], radius=18, fill="#0F172A")
+    cx, cy = x + 22, y + 23
+    for col in ("#FF5F56", "#FFBD2E", "#27C93F"):
+        draw.ellipse([cx - 5, cy - 5, cx + 5, cy + 5], fill=col)
+        cx += 20
+    ty = y + top
+    for i, ln in enumerate(lines):
+        if i == 0 and ln.startswith("> "):
+            draw.text((x + pad, ty), "> ", font=cf, fill=accent)
+            pw = draw.textlength("> ", font=cf)
+            draw.text((x + pad + pw, ty), ln[2:], font=cf, fill="#E8EEF5")
+        else:
+            draw.text((x + pad, ty), ln, font=cf, fill="#E8EEF5")
+        ty += line_h
+    return bottom
+
+
 def compose(slide: dict, background: str, out: str, assets: Path) -> dict:
     accent = safe_accent(slide.get("accent_hex") or DEFAULT_ACCENT)
     img = crop_cover(Image.open(background)) if background and Path(background).exists() \
@@ -337,6 +362,11 @@ def compose(slide: dict, background: str, out: str, assets: Path) -> dict:
                 draw.text((fx0 + 40, y), ln, font=bf, fill=TEXT)
                 y += 42
             drawn.append(("bullet", (fx0, y)))
+        term = slide.get("terminal") or ""
+        if term and term != "none":
+            y += 8
+            y = draw_terminal(draw, assets, term, fx0, y, fw, accent) + 14
+            drawn.append(("terminal", (fx0, y)))
         url = slide.get("url") or ""
         if url:
             uf = font(assets, "mono", 22)
