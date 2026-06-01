@@ -65,7 +65,7 @@ if [[ "$DRY_RUN" == "0" ]]; then
   python3 - "$VERSION" <<'PY'
 import json, sys, pathlib
 v = sys.argv[1]
-for p in ("./.claude-plugin/plugin.json", "./marketplace.json"):
+for p in ("./.claude-plugin/plugin.json", "./.claude-plugin/marketplace.json"):
     path = pathlib.Path(p)
     data = json.loads(path.read_text())
     if "version" in data:
