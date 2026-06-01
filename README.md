@@ -27,6 +27,22 @@ it at the install guide:
 
 That's the whole install. (Manual steps below if you'd rather do it yourself.)
 
+## Or download a release zip
+
+Prefer no agent and no clone? Grab a versioned release:
+
+1. Download the latest zip from [Releases](../../releases/latest).
+2. Unzip into your project's `.claude/` directory:
+   ```bash
+   cd your-project
+   unzip ~/Downloads/instagram-carousel-skills-v*.zip -d .claude/
+   ```
+   This drops the two skills into `.claude/skills/` and the shared assets into
+   `.claude/instagram-carousel/` (the skills resolve that path automatically).
+3. `pip install Pillow`, then set up HiggsField (CLI or MCP) per the steps below.
+
+See [RELEASE-NOTES.md](RELEASE-NOTES.md) for what's in each version.
+
 ## From zero (clean machine, nothing pre-installed)
 
 If you're starting in a fresh project that has **no Superpowers and no HiggsField**, this is the
