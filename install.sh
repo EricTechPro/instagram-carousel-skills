@@ -57,7 +57,7 @@ Done. Two skills installed:
   • instagram-carousel-plan      — research + copywriting -> carousel-spec.md
   • instagram-carousel-generate  — spec -> 1080x1350 slides (HiggsField GPT Image 2)
 
-Set this so the generate skill always finds the bundled assets:
+Assets auto-resolve from the install above. Only set this if you move them elsewhere:
   export IG_CAROUSEL_ASSETS="$ASSETS_DIR"
 
 Then in Claude Code: "plan an instagram carousel for <topic>".

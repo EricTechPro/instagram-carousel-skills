@@ -15,8 +15,8 @@ You are installing the **instagram-carousel** skills into the user's current pro
    This copies both skills into `.claude/skills/` and the shared assets (fonts, style
    references, logos) into `.claude/instagram-carousel/`.
 
-3. **Set the assets path** so the generate skill always finds them, and add it to the user's
-   shell profile if they want it to persist:
+3. **(Optional) Pin the assets path.** The generate skill auto-resolves
+   `.claude/instagram-carousel/`, so this is only needed if the user keeps assets elsewhere:
    ```bash
    export IG_CAROUSEL_ASSETS="$PWD/.claude/instagram-carousel"   # or ~/.claude/instagram-carousel if --global
    ```
