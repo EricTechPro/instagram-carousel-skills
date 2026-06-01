@@ -13,9 +13,10 @@ and NO text, NO lettering, NO logos. Portrait composition. Match the style of th
 ```
 
 ## References passed on EVERY generation (fixed set — prevents drift)
-- `assets/style-reference/ref-00-cover.jpg` … (the approved few-shot deck) — style lock.
+- `_reference-style/ref-00-cover.jpg` … (the approved few-shot deck at the project root,
+  user-swappable per BRAND.md) — style lock.
 - The **once-approved cover** background (after BFS) — world lock.
-- A canonical Clawd reference (crop one from the style-reference deck if no standalone file).
+- A canonical mascot reference (crop one from the `_reference-style/` deck if no standalone file).
 Pass them as repeated `--image` flags. **Pin one seed** for the whole deck
 (`higgsfield model get gpt_image_2 --json` to find the param) — same seed every slide.
 

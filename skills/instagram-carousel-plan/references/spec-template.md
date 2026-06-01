@@ -12,8 +12,8 @@ slug: top-5-github-repos
 sequence: listicle
 slide_count: 8
 cta_goal: reach            # save-bait | reach | traffic
-handle: "@erictech"
-style_ref: assets/style-reference     # swap images here to change the look
+handle: "@erictech"                   # default from BRAND.md — don't invent one
+style_ref: _reference-style           # project-root deck; swap images to change the look
 accent_default: "#2BAADF"
 audience: "junior devs drowning in boilerplate"
 payoff: "clone 5 repos, ship faster this week"
@@ -103,8 +103,11 @@ dm_trigger: "REPOS"
 ````
 
 ## Rules for filling it
+- `handle` + `accent_default`: read from `BRAND.md` at the project root (ships as `@erictech` /
+  `#2BAADF`). Never invent a handle or accent — if `BRAND.md` is missing, ask the user once.
 - `logo_file` + `accent_hex`: look up the featured tool in
-  `../instagram-carousel-generate/references/tool-brand-colors.md`. Default blue `#2BAADF` if none.
+  `../instagram-carousel-generate/references/tool-brand-colors.md`. Fall back to the BRAND.md
+  `default_accent` if the tool has none.
 - Respect density caps (headline ≤7 words, ≤3 bullets ≤6 words).
 - Every slide gets a `character_pose` and a `card_style` from the generate skill's vocab.
 - Leave `mimic_ui: none` unless the research flagged a worth-showing source UI.

@@ -36,11 +36,11 @@ Changes the whole arc and the final slide:
 - **Reach** — comment-to-DM funnel, ~5 slides
 - **Traffic** — link-in-bio, ~6 slides
 
-## Auto-decided — DO NOT ask
-- **Accent color** → per-tool brand map (default Eric Tech blue if no tool). 
+## Auto-decided — DO NOT ask (defaults from `BRAND.md` at the project root)
+- **Accent color** → per-tool brand map, falling back to BRAND.md `default_accent`.
 - **Research depth** → deep if sources were pasted, skip if none.
-- **Voice** → `eric-tech-tone` skill if present, else peer-to-peer confident.
-- **Style** → whatever images are in the reference folder (`assets/style-reference/`).
+- **Voice** → the voice skill named in BRAND.md (`eric-tech-tone`) if present, else peer-to-peer confident.
+- **Style** → whatever images are in `_reference-style/` (project root).
 
 Report these in one line so the user can override:
 > "Defaults: per-tool accents · deep research on your 3 links · peer voice. Say if you'd rather change any."

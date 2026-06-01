@@ -1,5 +1,18 @@
 # Release notes
 
+## v0.2.0 — 2026-06-01
+
+### Modular brand + discoverable style
+
+- **`BRAND.md`** — every brand default (handle, accent, voice, mascot) now lives in one editable
+  file at the project root. The skills read it instead of hardcoding `@erictech` / `#2BAADF` /
+  Clawd. Rebrand by editing one file.
+- **`_reference-style/`** (renamed from `assets/style-reference`) now installs at the **project
+  root** so the few-shot style deck is easy to find and swap.
+- Install is **non-clobbering** for both — a re-install keeps your edited `BRAND.md` and images.
+- Reference resolution: `$IG_CAROUSEL_STYLE` → project root → installed assets → legacy path.
+- CI smoke asserts `BRAND.md` + `_reference-style/` land at the project root.
+
 ## v0.1.0 — 2026-05-31
 
 ### Initial public release
