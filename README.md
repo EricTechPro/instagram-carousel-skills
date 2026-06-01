@@ -18,9 +18,9 @@ You do **not** need Superpowers or any sibling project.
 
 ## Install
 
-Pick one. All three drop the two skills into `.claude/skills/` and the shared assets (fonts,
-style references, logos) into `.claude/instagram-carousel/`, which the generate skill finds
-automatically.
+Pick one. All three drop the two skills into `.claude/skills/`, the shared assets (fonts, logos)
+into `.claude/instagram-carousel/` (auto-resolved), and two editable files at your project root:
+`BRAND.md` and `_reference-style/` (see [Make it yours](#make-it-yours)).
 
 **A — Ask your agent (easiest).** In any project, tell Claude (or any coding agent):
 
@@ -56,6 +56,18 @@ That's it for planning. To **generate** images you also need HiggsField (below).
 
 > Assets resolve automatically (`.claude/instagram-carousel/`). Only set
 > `IG_CAROUSEL_ASSETS` if you keep the assets somewhere non-standard.
+
+## Make it yours
+
+Everything brand-specific lives in two files at your project root — no code edits, and a
+re-install never overwrites them:
+
+- **`BRAND.md`** — your `@handle`, default accent, voice, and mascot. Ships set to Eric Tech;
+  change these and both skills follow.
+- **`_reference-style/`** — the few-shot image deck that defines the whole look (sky/grass/cards).
+  Swap these images to restyle every future carousel.
+
+(Zip-install users: both land in `.claude/` instead of the project root — still editable.)
 
 ## HiggsField setup (only needed to generate)
 

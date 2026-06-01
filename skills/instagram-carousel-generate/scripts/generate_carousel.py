@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -124,11 +125,41 @@ def build_plate_prompt(slide: dict) -> str:
     return PLATE_PREAMBLE + " " + PLATE_BY_TYPE.get(slide.get("type", "item"), PLATE_BY_TYPE["item"])
 
 
-def resolve_ref_set(assets: Path) -> list[Path]:
-    """The fixed few-shot deck passed on every generation to lock the world (no drift)."""
-    for d in (assets / "assets" / "style-reference", assets / "style-reference"):
-        if d.is_dir():
-            return sorted(p for p in d.iterdir() if p.suffix.lower() in (".jpg", ".jpeg", ".png"))
+def _find_upward(start: Path, name: str, max_up: int = 4) -> Path | None:
+    """Walk up from `start` looking for a directory named `name` (project-root discovery)."""
+    p = start.resolve()
+    for _ in range(max_up + 1):
+        if (p / name).is_dir():
+            return p / name
+        if p.parent == p:
+            break
+        p = p.parent
+    return None
+
+
+def resolve_ref_set(assets: Path, spec_path: Path | None = None) -> list[Path]:
+    """The fixed few-shot deck passed on every generation to lock the world (no drift).
+
+    Resolution order for the user-editable `_reference-style/` (see BRAND.md):
+      env IG_CAROUSEL_STYLE → project root (up from the spec, then cwd) → installed assets →
+      legacy `assets/style-reference`.
+    """
+    bases: list[Path] = []
+    env = os.environ.get("IG_CAROUSEL_STYLE")
+    if env:
+        bases.append(Path(env))
+    for start in (spec_path.parent if spec_path else None, Path.cwd()):
+        if start:
+            found = _find_upward(start, "_reference-style")
+            if found:
+                bases.append(found)
+    bases += [assets / "_reference-style", assets.parent / "_reference-style",
+              assets / "assets" / "style-reference"]  # installed + legacy fallback
+    for d in bases:
+        if d and Path(d).is_dir():
+            imgs = sorted(p for p in Path(d).iterdir() if p.suffix.lower() in (".jpg", ".jpeg", ".png"))
+            if imgs:
+                return imgs
     return []
 
 
@@ -255,7 +286,7 @@ def main(argv=None):
         print("Cost estimate (per slide):", per or "run `higgsfield generate cost` to see")
         print(f"This will generate ~{len(slides)} backgrounds.")
         # Upload the fixed reference set once; reuse the ids on every slide (locks the world).
-        refs = resolve_ref_set(assets)
+        refs = resolve_ref_set(assets, spec_path)
         ref_ids = [rid for rid in (hf_upload(p) for p in refs) if rid]
         print(f"Reference set: {len(ref_ids)}/{len(refs)} images uploaded")
 

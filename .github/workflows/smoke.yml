@@ -18,7 +18,9 @@ jobs:
           test -f "$TMP/.claude/skills/instagram-carousel-plan/SKILL.md"
           test -f "$TMP/.claude/skills/instagram-carousel-generate/SKILL.md"
           test -f "$TMP/.claude/instagram-carousel/character-references/github-logo.png"
-          echo "✓ both skills + assets installed"
+          test -f "$TMP/BRAND.md"                              # editable brand config at project root
+          test -f "$TMP/_reference-style/ref-00-cover.jpg"     # swappable style deck at project root
+          echo "✓ skills + assets + BRAND.md + _reference-style installed"
 
       - name: validate JSON manifests
         run: |

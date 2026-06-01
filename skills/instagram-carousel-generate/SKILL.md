@@ -72,8 +72,8 @@ the spec for copy-paste. Single-slide fixes: re-run `compose_slide.py` for a tex
 regen just that one background.
 
 ## Consistency mechanism (no slide-to-slide drift)
-Pass the **same reference set on every generation**: the canonical Clawd reference, the once-approved
-cover, and the `style-reference/` deck as few-shot — plus one **pinned seed** for the whole deck.
+Pass the **same reference set on every generation**: the canonical mascot reference, the once-approved
+cover, and the `_reference-style/` deck (project root, user-swappable per `BRAND.md`) as few-shot — plus one **pinned seed** for the whole deck.
 **Never** chain slide N−1 as the reference for slide N (that causes drift). Keep the generation prompt
 short (world + Clawd + blank card only — no copy to spell).
 

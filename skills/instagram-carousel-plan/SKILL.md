@@ -67,7 +67,9 @@ Read `references/copy-frameworks.md` and `references/sequence-patterns.md`. Appl
 - **Anti-AI scrub (mandatory)** — run the cut-list in `copy-frameworks.md` before emitting.
 
 ### 5. Emit the spec
-Write `instagram-carousel/<topic-slug>/carousel-spec.md` using `references/spec-template.md`:
+First read **`BRAND.md`** at the project root for the brand defaults (`handle`, `default_accent`,
+`voice`) — never invent a handle or accent; if it's missing, ask the user once. Then write
+`instagram-carousel/<topic-slug>/carousel-spec.md` using `references/spec-template.md`:
 global meta + **ASCII layout diagram** + one block per slide + the caption/hashtags/DM-trigger block.
 
 ### 6. Approve + hand off (spec-driven marketing)

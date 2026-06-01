@@ -85,10 +85,13 @@ STAGE="$(mktemp -d)"
 mkdir -p "$STAGE/skills" "$STAGE/instagram-carousel"
 for s in "${SKILLS[@]}"; do cp -R "skills/$s" "$STAGE/skills/"; done
 cp -R assets character-references "$STAGE/instagram-carousel/"
+# editable brand config + style deck (zip unzips into .claude/, so these land there for zip users)
+cp BRAND.md "$STAGE/BRAND.md"
+cp -R _reference-style "$STAGE/_reference-style"
 find "$STAGE" -type d -name __pycache__ -prune -exec rm -rf {} + 2>/dev/null || true
 find "$STAGE" \( -name '*.pyc' -o -name '.DS_Store' \) -delete 2>/dev/null || true
 rm -f "$ZIP"
-( cd "$STAGE" && zip -qr "$ZIP" skills instagram-carousel )
+( cd "$STAGE" && zip -qr "$ZIP" skills instagram-carousel _reference-style BRAND.md )
 echo "  ✓ built $ZIP ($(du -h "$ZIP" | cut -f1))"
 
 # --- commit, tag, push, release --------------------------------------------

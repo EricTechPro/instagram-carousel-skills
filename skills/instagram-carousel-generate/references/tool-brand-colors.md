@@ -1,8 +1,9 @@
 # Tool → accent color + logo (shared by plan & generate)
 
 When a slide features a specific tool/brand, the accent color and logo come from here. If the
-featured tool isn't listed, use the default Eric Tech blue `#2BAADF` and no logo (or the closest
-match). Logo files live in `character-references/` (bundled; swappable / extendable by the user).
+featured tool isn't listed, use the `default_accent` from `BRAND.md` (ships as Eric Tech blue
+`#2BAADF`) and no logo (or the closest match). Logo files live in `character-references/`
+(bundled; swappable / extendable by the user).
 
 | Tool / brand | accent_hex | logo_file |
 |---|---|---|

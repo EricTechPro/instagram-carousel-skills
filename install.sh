@@ -20,9 +20,11 @@ if [[ -n "${1:-}" && "$1" != "--global" ]]; then TARGET="$1"; fi
 if [[ "$GLOBAL" == "1" ]]; then
   SKILLS_DIR="$HOME/.claude/skills"
   ASSETS_DIR="$HOME/.claude/instagram-carousel"
+  ROOT_DIR="$HOME/.claude/instagram-carousel"   # no single project root when --global
 else
   SKILLS_DIR="$TARGET/.claude/skills"
   ASSETS_DIR="$TARGET/.claude/instagram-carousel"
+  ROOT_DIR="$TARGET"                            # editable brand + style sit at the project root
 fi
 
 echo "Installing Instagram Carousel skills"
@@ -51,11 +53,29 @@ cp -R "$SRC_DIR/character-references" "$ASSETS_DIR/character-references"
 chmod +x "$SKILLS_DIR/instagram-carousel-generate/scripts/"*.py 2>/dev/null || true
 echo "  ✓ assets -> $ASSETS_DIR"
 
+# Editable brand config + style deck go at the project root so they're easy to find and change.
+# Never clobber: a re-install must preserve the user's edited BRAND.md and swapped style images.
+mkdir -p "$ROOT_DIR"
+if [[ -e "$ROOT_DIR/BRAND.md" ]]; then
+  echo "  · BRAND.md exists, keeping yours"
+else
+  cp "$SRC_DIR/BRAND.md" "$ROOT_DIR/BRAND.md"; echo "  ✓ BRAND.md -> $ROOT_DIR/BRAND.md (edit to rebrand)"
+fi
+if [[ -e "$ROOT_DIR/_reference-style" ]]; then
+  echo "  · _reference-style exists, keeping yours"
+else
+  cp -R "$SRC_DIR/_reference-style" "$ROOT_DIR/_reference-style"; echo "  ✓ _reference-style -> $ROOT_DIR/_reference-style (swap images to restyle)"
+fi
+
 cat <<EOF
 
 Done. Two skills installed:
   • instagram-carousel-plan      — research + copywriting -> carousel-spec.md
   • instagram-carousel-generate  — spec -> 1080x1350 slides (HiggsField GPT Image 2)
+
+Make it yours (optional):
+  • $ROOT_DIR/BRAND.md           — handle, accent, voice, mascot
+  • $ROOT_DIR/_reference-style/  — swap these images to change the whole look
 
 Assets auto-resolve from the install above. Only set this if you move them elsewhere:
   export IG_CAROUSEL_ASSETS="$ASSETS_DIR"

@@ -53,5 +53,6 @@ count, and require **one** confirmation before the batch. Report actual credits 
 ## Prereq check order (skill runs this first, before any spend)
 1. HiggsField reachable (CLI `account status` OK, or MCP connected).
 2. `python3 -c "import PIL"` OK (else `pip install -r requirements.txt`).
-3. Assets resolve (fonts, style-reference, character-references) via the asset contract.
+3. Assets resolve: fonts + character-references via the asset contract; `_reference-style/` via
+   the project root (see BRAND.md).
 Print the exact remedy for whichever fails, and stop.

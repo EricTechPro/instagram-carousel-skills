@@ -5,7 +5,7 @@ sequence: listicle
 slide_count: 8
 cta_goal: reach
 handle: "@erictech"
-style_ref: assets/style-reference
+style_ref: _reference-style
 accent_default: "#2BAADF"
 audience: "junior devs drowning in boilerplate"
 payoff: "clone 5 repos, ship faster this week"
