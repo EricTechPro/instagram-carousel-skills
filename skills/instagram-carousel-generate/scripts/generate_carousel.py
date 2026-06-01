@@ -135,13 +135,20 @@ def build_plate_prompt(slide: dict) -> str:
 
 
 # ---- full-slide prompt (GPT Image 2 renders the text too) -------------------
-STYLE = (
+# Brand-neutral fallbacks (used only when the spec meta omits these). The active brand profile
+# (BRAND.md / BRAND.<name>.md) supplies `style`, `mascot`, `surface`, `accent_default`, `handle`
+# into the spec meta, so NOTHING brand-specific is baked into the render path — these defaults just
+# reproduce the original Claude/Clawd look for back-compat.
+DEFAULT_STYLE = (
     "Polished, soft-lit premium 3D illustration in a friendly children's-book style — match the "
     "reference images closely. Sunny scene: bright blue sky, soft white clouds, a green grass strip. "
-    "A small, CUTE, rounded orange voxel mascot named Clawd with tiny dark sunglasses — smooth and "
-    "simple, NOT a cluttered blocky Minecraft world. Keep the composition clean and uncluttered with "
-    "lots of open sky and breathing room. Tall portrait 4:5 composition. Warm orange accent."
+    "Keep the composition clean and uncluttered with lots of open sky and breathing room. Tall "
+    "portrait 4:5 composition."
 )
+DEFAULT_MASCOT = "a small, cute, rounded orange voxel mascot named Clawd with tiny dark sunglasses"
+DEFAULT_SURFACE = "a cream paper note pinned to a wooden signboard on a post"
+
+_MONO_ACCENTS = {"", "monochrome", "mono", "none", "bw", "b&w", "black and white", "black & white"}
 
 
 def _q(s: str) -> str:
@@ -150,47 +157,55 @@ def _q(s: str) -> str:
 
 
 def build_slide_prompt(slide: dict, meta: dict) -> str:
-    """A complete-slide prompt in the reference style: ONE big elegant serif headline is the hero,
-    minimal supporting text, a small cute mascot, wooden-sign/cream-note framing. GPT Image 2
-    renders the world, the mascot AND the text. Every string is quoted so it letters exactly."""
-    accent = (slide.get("accent_hex") or meta.get("accent_default") or "#D97757")
+    """A complete-slide prompt: ONE big elegant serif headline is the hero, minimal supporting text,
+    a host/mascot, framed per the brand's surface. GPT Image 2 renders the scene AND the text.
+    Style, mascot, surface, accent, handle, and terminal labels all come from the spec meta (filled
+    from the active BRAND profile); the constants above are only neutral fallbacks. Every string is
+    quoted so the model letters it exactly."""
+    style = _q(meta.get("style") or DEFAULT_STYLE)
+    mascot = _q(meta.get("mascot") or DEFAULT_MASCOT)
+    surface = _q(meta.get("surface") or DEFAULT_SURFACE)
+    accent = str(slide.get("accent_hex") or meta.get("accent_default") or "").strip()
+    mono = accent.lower() in _MONO_ACCENTS
     handle = _q(slide.get("handle") or meta.get("handle") or "")
     stype = slide.get("type", "item")
     headline, subhead = _q(slide.get("headline", "")), _q(slide.get("subhead", ""))
     badge = _q(slide.get("badge", "") or "")
     bullets = [_q(b) for b in (slide.get("bullets") or []) if b][:3]
     terminal = _q(slide.get("terminal", "") or "")
-    pose = _q(slide.get("character_pose", "") or "the cute orange mascot Clawd")
+    pose = _q(slide.get("character_pose", "") or f"the host — {mascot}")
 
-    p = [STYLE]
-    # The headline is the hero — big, elegant serif, scroll-stopping. Keep everything else minimal.
-    p.append(f'HERO HEADLINE — the focus of the slide, VERY LARGE bold elegant serif in dark '
-             f'charcoal, easy to read while scrolling: "{headline}". Set the most important word in '
-             f'italic serif in the accent color {accent}.')
+    emph = ("Emphasize the most important word in italic (monochrome — no color)." if mono
+            else f"Set the most important word in italic in the accent color {accent}.")
+    bullet_tone = "black" if mono else accent
+
+    p = [style]
+    p.append(f'HERO HEADLINE — the focus of the slide, VERY LARGE bold elegant serif, easy to read '
+             f'while scrolling: "{headline}". {emph}')
     if subhead:
         p.append(f'One short supporting line, smaller, beneath it: "{subhead}".')
 
     if stype == "cover":
         if badge and badge.lower() != "none":
-            p.append(f'A small rounded pill badge reading "{badge}".')
-        p.append(f"The headline spans the upper half over open sky. Below it, large and central, "
-                 f"the scene: {pose}. Bottom-right, a small italic label: \"swipe →\".")
+            p.append(f'A small badge reading "{badge}".')
+        p.append(f"The headline spans the upper portion. Below it, large and central, the scene: "
+                 f"{pose}. Bottom-right, a small italic label: \"swipe →\".")
     else:
-        p.append("The text sits on a cream paper note pinned to a wooden signboard on a post, "
-                 "centered with generous margins, like the reference — minimal wording, big headline.")
+        p.append(f"The text sits on {surface}, centered with generous margins — minimal wording, big headline.")
         if badge and badge.lower() != "none":
-            p.append(f'A small tracked uppercase label at the top of the note: "{badge}".')
+            p.append(f'A small tracked uppercase label at the top: "{badge}".')
         if bullets:
             items = "; ".join(f'"{b}"' for b in bullets)
-            p.append(f"A short list, each line led by a small {accent} square bullet: {items}.")
+            p.append(f"A short list, each line led by a small {bullet_tone} square bullet: {items}.")
         if terminal:
-            p.append('A compact terminal panel on the note, styled like the Claude Code CLI: dark '
-                     'rounded window, three small red/yellow/green dots and a tiny orange Claude '
-                     f'sunburst logo in the title bar, white monospace text "> {terminal}", and a '
-                     'thin bottom status bar reading "Opus 4.8".')
-        p.append(f"At the base of the post, small and cute: {pose}.")
+            term_app = _q(meta.get("terminal_app") or "Claude Code")
+            term_status = _q(meta.get("terminal_status") or "Opus 4.8")
+            p.append(f'A compact terminal panel styled like the {term_app} CLI: dark rounded window, '
+                     f'three small red/yellow/green dots and a tiny app logo in the title bar, white '
+                     f'monospace text "> {terminal}", and a thin bottom status bar reading "{term_status}".')
+        p.append(f"In a small scene, the host: {pose}.")
     if handle:
-        p.append(f'At the very bottom-left, small WHITE text with a soft drop shadow: "{handle}".')
+        p.append(f'At the very bottom-left, small high-contrast text: "{handle}".')
     p.append("Minimal text overall, big readable type, clean and uncluttered, no watermark, and no "
              "extra arrows or captions along the bottom edge.")
     return " ".join(p)

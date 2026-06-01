@@ -6,7 +6,7 @@ carousels yours** — change the handle, accent, voice, and mascot, then swap th
 skills follow. Nothing brand-specific is hardcoded in the skills.
 
 ## Identity
-- `handle`: `@erictech`
+- `handle`: `@erictechpro`
 - `default_accent`: `#2BAADF`   <!-- used when a slide's featured tool has no brand color -->
 - `voice`: `eric-tech-tone`     <!-- a voice skill to use IF installed; otherwise: peer-to-peer, confident, concrete -->
 
@@ -31,4 +31,16 @@ The generated world (sky, grass, cream cards) is defined entirely by the images 
 3. Swap the logo PNGs in `character-references/` and update
    `skills/instagram-carousel-generate/references/tool-brand-colors.md`.
 
-That's the whole rebrand — three edits, no code.
+That's the whole rebrand — no code.
+
+## Running multiple brands (no code, non-destructive)
+The skills are brand-portable: `handle`, `default_accent`, `mascot`, `style`, and `surface` flow
+**BRAND profile → spec `meta` → prompt** (nothing brand-specific is hardcoded). To keep a second
+brand alongside this one:
+- Add a **`BRAND.<name>.md`** profile (e.g. `BRAND.hermes.md`) with that brand's handle / mascot /
+  style / surface. Use `default_accent: monochrome` for a pure black-&-white brand (emphasis becomes
+  italic, no color).
+- Point generation at a **per-brand reference** with `IG_CAROUSEL_STYLE=<folder>` (even just that
+  brand's logo); this leaves the default `_reference-style/` untouched.
+- Worked example: `examples/hermes-agent-use-cases/` — a vintage-manga, monochrome `@hermes` deck
+  from the *same* skill + scripts, proving the look isn't locked to Clawd/voxel.
