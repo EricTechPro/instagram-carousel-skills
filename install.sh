@@ -43,6 +43,9 @@ for skill in instagram-carousel-plan instagram-carousel-generate; do
 done
 
 # Shared assets the generate skill needs at runtime (style refs + logos + fonts).
+# rm -rf first so re-running the installer replaces assets instead of nesting them
+# (cp -R into an existing dir would create assets/assets, character-references/character-references).
+rm -rf "$ASSETS_DIR/assets" "$ASSETS_DIR/character-references"
 cp -R "$SRC_DIR/assets" "$ASSETS_DIR/assets"
 cp -R "$SRC_DIR/character-references" "$ASSETS_DIR/character-references"
 chmod +x "$SKILLS_DIR/instagram-carousel-generate/scripts/"*.py 2>/dev/null || true
