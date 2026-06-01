@@ -71,7 +71,10 @@ Read `references/copy-frameworks.md` and `references/sequence-patterns.md`. Appl
 
 ### 5. Emit the spec
 First read **`BRAND.md`** at the project root for the brand defaults (`handle`, `default_accent`,
-`voice`) — never invent a handle or accent; if it's missing, ask the user once. Then write
+`voice`) — never invent a handle or accent; if it's missing, ask the user once. The **`handle` is the
+user's real Instagram account username** (the one the carousel will post from), and generate letters it
+into *every* slide — so confirm it's right here, in cheap text, rather than after images are rendered
+(changing it later forces a full re-render of the deck). Then write
 `instagram-carousel/<topic-slug>/spec/carousel-spec.md` using `references/spec-template.md`:
 global meta + **ASCII layout diagram** + one block per slide — **each led by an ASCII wireframe**
 (where badge/headline/subhead/bullets/mascot/logo/handle land) so the user can review the layout
