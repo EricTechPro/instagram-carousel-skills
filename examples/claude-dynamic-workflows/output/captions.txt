@@ -39,4 +39,4 @@ Each is one command. Comment WORKFLOW and I'll send you all 5.
 
 ---
 DM TRIGGER: WORKFLOW
-HANDLE: @EricTechPro
+HANDLE: @erictechpro
