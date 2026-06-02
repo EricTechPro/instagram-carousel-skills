@@ -1,5 +1,19 @@
 # Release notes
 
+## v0.4.0 — 2026-06-01
+
+### Fix: the MCP/Cowork path now writes real images into `output/`, not a download script
+
+- **`references/higgsfield-setup.md`** — new "Saving renders on the MCP path" section. On hosts that
+  sandbox the network and block HiggsField's CDN (`*.cloudfront.net → 403 blocked-by-allowlist`, e.g.
+  Cowork), the agent must save each render's **inline/base64 bytes** straight to `output/slide-NN.png`
+  (no network, so the allowlist can't bite). Fetching the URL is the second choice; writing a
+  `download_slides.sh` is now an explicitly-labelled **last resort**, never the primary deliverable.
+  Added a `blocked-by-allowlist` row to the failure-mode table and a note that getting images
+  in-sandbox requires either MCP-returned bytes or allowlisting the CDN host.
+- **`SKILL.md`** — §6 Deliver now states the MCP-path deliverable is image files in `output/`, with the
+  bytes saved directly from the MCP tool result.
+
 ## v0.3.1 — 2026-06-01
 
 ### Fix: a single odd HiggsField response no longer crashes the batch

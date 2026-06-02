@@ -98,6 +98,12 @@ re-run resumes the missing ones. **Single-slide re-roll:** `--only N` (≈7 cred
 Report all `output/*.png` paths + the contact sheet. Surface the caption + hashtags + DM-trigger for
 copy-paste. To fix a slide, edit its spec fields and re-roll just that one with `--only N`.
 
+**On the MCP path (Cowork):** the deliverable is the same — real image files written into `output/`
+(`slide-NN.png`), **not** a download script. Save each render's bytes directly from the MCP tool result;
+if the host sandboxes HiggsField's CDN, follow `references/higgsfield-setup.md` → "Saving renders on the
+MCP path". Only fall back to a `download_slides.sh` when the bytes truly can't be written in-sandbox, and
+label it as a fallback.
+
 ## Consistency (no slide-to-slide drift)
 Pass the **same `_reference-style/` deck on every generation** plus the same locked `STYLE` preamble in
 the prompt. `gpt_image_2` has no seed — consistency rides on identical references + preamble. Never
