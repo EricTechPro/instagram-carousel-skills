@@ -102,12 +102,16 @@ the cover is locked first and the `@handle` is confirmed before the full batch.
 
 ## Examples
 
-Two complete runs ship in [`examples/`](examples), each laid out the same way — **input → spec → output**:
+Three complete runs ship in [`examples/`](examples), each laid out the same way — **input → spec → output**:
 
 - **[`claude-dynamic-workflows/`](examples/claude-dynamic-workflows)** — the default Eric Tech look (voxel "Clawd", blue accent).
   - [`input/`](examples/claude-dynamic-workflows/input) — the research wiki the copy was built from (one `.md` per source)
   - [`spec/carousel-spec.md`](examples/claude-dynamic-workflows/spec/carousel-spec.md) — the approved spec: slides + caption + hashtags + DM-trigger
   - [`output/`](examples/claude-dynamic-workflows/output) — the rendered `slide-01.png … slide-NN.png` + `_contact-sheet.png`
+- **[`claude-usage-limit/`](examples/claude-usage-limit)** — a real listicle we shipped: "5 settings that stopped my Claude Code usage limit." Same voxel "Clawd", Claude-orange accent, `@erictechpro` — a cover → problem → 5 fixes → DM-trigger sequence.
+  - [`input/`](examples/claude-usage-limit/input) — the research the copy was built from (sources, audience demand, competitor gaps, video content)
+  - [`spec/carousel-spec.md`](examples/claude-usage-limit/spec/carousel-spec.md) — the approved spec: slides + caption + hashtags + DM-trigger
+  - [`output/`](examples/claude-usage-limit/output) — the rendered `slide-01.png … slide-08.png` + `_contact-sheet.png`
 - **[`hermes-agent-use-cases/`](examples/hermes-agent-use-cases)** — a totally different brand from the *same* skills: vintage shoujo-manga, monochrome B&W, `@erictechpro`. Proof nothing is hardcoded.
   - [`input/`](examples/hermes-agent-use-cases/input) — the research wiki (one `.md` per source)
   - [`spec/carousel-spec.md`](examples/hermes-agent-use-cases/spec/carousel-spec.md) — the approved spec
