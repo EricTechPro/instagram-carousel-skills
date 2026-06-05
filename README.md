@@ -1,4 +1,4 @@
-# Instagram Carousel Skills
+# 📸 Instagram Carousel Skills
 
 Turn any Instagram post or pile of sources into a finished, on-brand Instagram carousel — without
 leaving your agent. Use it right inside **Claude Code** or **Claude Cowork**: two skills combine,
@@ -19,7 +19,7 @@ and DM-trigger into a reviewable `carousel-spec.md`. You approve it (cheap — n
 **generate** skill renders that spec into full 3:4 portrait slides via HiggsField GPT Image 2 — which
 letters every slide's text itself — as one consistent set.
 
-## Prerequisites
+## ✅ Prerequisites
 
 | Need | Why |
 |---|---|
@@ -32,7 +32,7 @@ letters every slide's text itself — as one consistent set.
 separate step the generate skill walks you through before any credits are spent — see
 [`higgsfield-setup.md`](skills/instagram-carousel-generate/references/higgsfield-setup.md).
 
-## Step 1 — Install
+## 📦 Step 1 — Install
 
 You don't clone anything or run a plugin command. Hand the repo URL to your agent and it installs
 for itself. Pick your host and copy the block — full details in **[INSTALL.md](INSTALL.md)**.
@@ -53,7 +53,7 @@ for itself. Pick your host and copy the block — full details in **[INSTALL.md]
   Read the repo's docs/install.md and follow it for the Claude Cowork (HiggsField MCP) path.
   ```
 
-## Step 2 — Make it yours
+## 🎨 Step 2 — Make it yours
 
 Two things land at your project root on install — **never overwritten** on re-install.
 
@@ -68,7 +68,7 @@ Two things land at your project root on install — **never overwritten** on re-
 - Voice + mascot
 - Both skills read it; nothing is hardcoded
 
-## Step 3 — Plan a carousel — `/instagram-carousel-plan`
+## ✍️ Step 3 — Plan a carousel — `/instagram-carousel-plan`
 
 Run the slash command with the sources you have — paste links, or point it at a folder of research
 notes (reference the path in square brackets):
@@ -84,7 +84,7 @@ It asks ≤4 questions, researches your sources, and writes `carousel-spec.md` (
 ASCII layout). Edit any field directly in that file; once you're happy, it's locked. See a real
 run in [`examples/claude-dynamic-workflows/`](examples/claude-dynamic-workflows) — input → spec → output.
 
-## Step 4 — Generate the slides — `/instagram-carousel-generate`
+## 🎬 Step 4 — Generate the slides — `/instagram-carousel-generate`
 
 Approve the spec, then run the slash command — bare to use the latest spec, or with its file path:
 
@@ -100,7 +100,16 @@ It shows a cost estimate first, locks the cover (cheap — one slide), then rend
 copy edit means re-rolling that slide (a small credit spend) — there's no free text layer. That's why
 the cover is locked first and the `@handle` is confirmed before the full batch.
 
-## Examples
+## 📁 What gets created
+
+```text
+instagram-carousel/<slug>/
+├── carousel-spec.md              # the approved copy + layout   (plan)
+├── slide-01.png … slide-NN.png   # rendered 3:4 portrait slides (generate)
+└── _contact-sheet.png            # every slide in one image
+```
+
+## 🖼️ Examples
 
 Three complete runs ship in [`examples/`](examples), each laid out the same way — **input → spec → output**:
 
@@ -118,7 +127,7 @@ Three complete runs ship in [`examples/`](examples), each laid out the same way 
   - [`output/`](examples/hermes-agent-use-cases/output) — the rendered slides + `_contact-sheet.png`
   - [`style-ref/`](examples/hermes-agent-use-cases/style-ref) — the per-brand reference deck (pointed at via `IG_CAROUSEL_STYLE`) that restyles the whole carousel **without touching** `_reference-style/`
 
-## Under the hood
+## 🔎 Under the hood
 
 - **Skills:** plan, then generate
 - **Image model:** HiggsField GPT Image 2 — letters every slide's text itself (no Pillow text overlay)
@@ -128,6 +137,6 @@ Three complete runs ship in [`examples/`](examples), each laid out the same way 
 - **Dependencies:** Python 3.9+, Pillow
 - **Planning:** zero image credits spent
 
-## License
+## 📐 License
 
 MIT — see [LICENSE](LICENSE).
